@@ -1,0 +1,26 @@
+{
+  "name": "news-admin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev --port 3002",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "generate:api-types": "openapi-typescript ../news-backend/openapi/openapi.json -o ./types/generated/api.d.ts"
+  },
+  "dependencies": {
+    "@tiptap/extension-image": "^3.29.1",
+    "@tiptap/pm": "^3.29.1",
+    "@tiptap/starter-kit": "^3.29.1",
+    "@tiptap/vue-3": "^3.29.1",
+    "nuxt": "3.15.0",
+    "vue": "3.5.13",
+    "vue-router": "4.5.0"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.13.0",
+    "typescript": "5.7.2"
+  }
+}
