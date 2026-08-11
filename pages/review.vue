@@ -16,9 +16,9 @@
           <div class="row-actions">
             <button @click="openPreview(article.id)">预览</button>
             <button @click="showHistory(article.id, article.title)">历史</button>
-            <button v-if="article.status === 'review'" class="approve" :disabled="!hasPermission('articles.review.decide')" title="需要审核权限" @click="decide(article.id, 'approve')">{{ hasPermission('articles.review.decide') ? '通过' : '🔒 通过' }}</button>
-            <button v-if="article.status === 'review'" class="reject" :disabled="!hasPermission('articles.review.decide')" title="需要审核权限" @click="openReject(article.id, article.title)">{{ hasPermission('articles.review.decide') ? '退回' : '🔒 退回' }}</button>
-            <button v-if="article.status === 'approved'" class="publish-small" :disabled="!hasPermission('articles.publish')" title="需要发布权限" @click="decide(article.id, 'publish')">{{ hasPermission('articles.publish') ? '发布' : '🔒 发布' }}</button>
+            <button v-if="article.status === 'review'" class="approve" @click="requestApprove(article.id)">{{ hasPermission('articles.review.decide') ? '通过' : '🔒 通过' }}</button>
+            <button v-if="article.status === 'review'" class="reject" @click="requestReject(article.id, article.title)">{{ hasPermission('articles.review.decide') ? '退回' : '🔒 退回' }}</button>
+            <button v-if="article.status === 'approved'" class="publish-small" @click="requestPublish(article.id)">{{ hasPermission('articles.publish') ? '发布' : '🔒 发布' }}</button>
           </div>
         </div>
         <p v-if="!reviewArticles.length" class="empty-state">当前没有待处理文章。</p>
@@ -46,6 +46,7 @@
           <div><p class="eyebrow">REVIEW HISTORY</p><h2>{{ historyTarget.title }}</h2></div>
           <button class="modal-close" @click="historyTarget = null">×</button>
         </div>
+        <p class="history-explanation">这里记录文章每一次提交审核、退回、再次提交、审核通过和发布的完整过程。作者修改后重新提交时，之前的退回原因和审核记录仍会保留。</p>
         <h3>审核意见</h3>
         <div v-if="historyTarget.data.reviewComments.length" class="timeline">
           <article v-for="comment in historyTarget.data.reviewComments" :key="comment.id">
@@ -73,6 +74,7 @@ definePageMeta({ middleware: ['auth'] });
 const { hasPermission } = useAuth();
 const { list, approve, reject, publish, history } = useArticlesApi();
 const { success, error } = useToast();
+const permissionNotice = usePermissionNotice();
 const config = useRuntimeConfig();
 const { data: articles, refresh } = await useAsyncData('review-articles', () => list(), { default: () => [] });
 const reviewArticles = computed(() =>
@@ -92,6 +94,18 @@ const openPreview = (id: string) => {
 const openReject = (id: string, title: string) => {
   rejectTarget.value = { id, title };
   rejectComment.value = '';
+};
+const requestApprove = (id: string) => {
+  if (!hasPermission('articles.review.decide')) return permissionNotice.open('审核通过文章', '审核文章权限');
+  return decide(id, 'approve');
+};
+const requestReject = (id: string, title: string) => {
+  if (!hasPermission('articles.review.decide')) return permissionNotice.open('退回文章', '审核文章权限');
+  openReject(id, title);
+};
+const requestPublish = (id: string) => {
+  if (!hasPermission('articles.publish')) return permissionNotice.open('发布文章', '文章发布权限（管理员）');
+  return decide(id, 'publish');
 };
 const closeReject = () => {
   rejectTarget.value = null;

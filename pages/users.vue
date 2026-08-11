@@ -22,7 +22,7 @@
           <summary>查看合并后的权限（{{ permissionsFor(account.id).length }}）</summary>
           <div class="permission-list"><span v-for="permission in permissionsFor(account.id)" :key="permission.key">{{ permission.description }}</span></div>
         </details>
-        <button class="button primary" type="button" :disabled="!canManage || saving === account.id || !selectedRoles[account.id]?.length" @click="openConfirmation(account)">
+        <button class="button primary" type="button" :disabled="saving === account.id || !selectedRoles[account.id]?.length" @click="openConfirmation(account)">
           {{ canManage ? '保存角色设置' : '🔒 仅管理员可修改' }}
         </button>
       </article>
@@ -61,6 +61,7 @@ type RoleDTO = components['schemas']['RoleDto'];
 const config = useRuntimeConfig();
 const { user, authHeaders, hasPermission } = useAuth();
 const toast = useToast();
+const permissionNotice = usePermissionNotice();
 const canManage = computed(() => hasPermission('users.permissions.manage'));
 const saving = ref('');
 const confirmTarget = ref<AccountDTO | null>(null);
@@ -80,7 +81,10 @@ watchEffect(() => { for (const account of accounts.value) if (!selectedRoles[acc
 const toggleRole = (userId: string, roleId: string) => { const current = selectedRoles[userId] || []; selectedRoles[userId] = current.includes(roleId) ? current.filter((id) => id !== roleId) : [...current, roleId]; };
 const permissionsFor = (userId: string) => Array.from(new Map(roles.value.filter((role) => (selectedRoles[userId] || []).includes(role.id)).flatMap((role) => role.permissions).map((permission) => [permission.key, permission])).values());
 const selectedRoleLabels = (userId: string) => roles.value.filter((role) => (selectedRoles[userId] || []).includes(role.id)).map((role) => roleMeta[role.name]?.label || role.name).join('、');
-const openConfirmation = (account: AccountDTO) => { confirmTarget.value = account; credentials.email = user.value?.email || ''; credentials.password = ''; showPassword.value = false; };
+const openConfirmation = (account: AccountDTO) => {
+  if (!canManage.value) return permissionNotice.open('修改账号角色和权限', '账号及权限管理权限（管理员）');
+  confirmTarget.value = account; credentials.email = user.value?.email || ''; credentials.password = ''; showPassword.value = false;
+};
 const closeConfirmation = () => { if (saving.value) return; confirmTarget.value = null; credentials.password = ''; };
 const confirmSave = async () => {
   if (!confirmTarget.value) return;

@@ -5,10 +5,11 @@
         <p class="eyebrow">MEDIA LIBRARY</p>
         <h1>媒体库</h1>
       </div>
-      <label class="button primary media-upload" :class="{ disabled: !canUpload }" :title="canUpload ? '' : '你没有上传媒体的权限'">
+      <label v-if="canUpload" class="button primary media-upload">
         {{ uploading ? '上传中…' : '上传图片' }}
-        <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" :disabled="uploading || !canUpload" @change="upload" />
+        <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" :disabled="uploading" @change="upload" />
       </label>
+      <button v-else class="button primary" type="button" @click="permissionNotice.open('上传图片', '媒体上传权限')">🔒 上传图片</button>
     </div>
 
     <section v-if="pending" class="panel">正在加载媒体资源…</section>
@@ -26,11 +27,11 @@
             <button
               class="button danger"
               type="button"
-              :disabled="!canDelete || asset.referenceCount > 0 || deleting === asset.id"
+              :disabled="asset.referenceCount > 0 || deleting === asset.id"
               :title="asset.referenceCount > 0 ? '图片仍被文章引用，不能删除' : ''"
-              @click="removeAsset(asset.id, asset.filename)"
+              @click="requestDelete(asset.id, asset.filename)"
             >
-              {{ deleting === asset.id ? '删除中…' : '删除' }}
+              {{ deleting === asset.id ? '删除中…' : canDelete ? '删除' : '🔒 删除' }}
             </button>
           </div>
         </div>
@@ -47,6 +48,7 @@ const { hasPermission } = useAuth();
 const canUpload = computed(() => hasPermission('media.upload'));
 const canDelete = computed(() => hasPermission('media.delete'));
 const toast = useToast();
+const permissionNotice = usePermissionNotice();
 const uploading = ref(false);
 const deleting = ref('');
 const { data: assets, pending, refresh } = await useAsyncData('media-library', () => mediaApi.list());
@@ -85,6 +87,10 @@ const removeAsset = async (id: string, filename: string) => {
   } finally {
     deleting.value = '';
   }
+};
+const requestDelete = (id: string, filename: string) => {
+  if (!canDelete.value) return permissionNotice.open('删除图片', '媒体删除权限');
+  return removeAsset(id, filename);
 };
 
 const formatTime = (value: string) => new Date(value).toLocaleString('zh-CN');
