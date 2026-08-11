@@ -181,6 +181,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/articles/public/withdrawn/slug/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a public withdrawal notice without exposing article content */
+        get: operations["ArticlesController_findWithdrawalBySlug"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/articles/{id}/preview": {
         parameters: {
             query?: never;
@@ -692,6 +709,13 @@ export interface components {
             /** @example 20 */
             limit: number;
         };
+        WithdrawalNoticeDto: {
+            title: string;
+            slug: string;
+            reason: string;
+            /** Format: date-time */
+            withdrawnAt: string;
+        };
         ReviewCommentDto: {
             /** @example comment-001 */
             id: string;
@@ -738,7 +762,7 @@ export interface components {
              * @description 稿件日期；与系统创建时间和发布时间分开
              * @example 2026-08-12T00:00:00.000Z
              */
-            articleDate?: string;
+            articleDate: string;
             /** @example user-author */
             authorId: string;
             /** @example user-author */
@@ -807,9 +831,17 @@ export interface components {
              */
             expectedUpdatedAt?: string;
         };
+        ApproveArticleDto: {
+            /** @example 已核对来源，同意发布。 */
+            comment?: string;
+        };
         RejectArticleDto: {
             /** @example 图片版权不明确，请补充来源。 */
             comment: string;
+        };
+        WithdrawArticleDto: {
+            /** @example 部分事实需要进一步核实。 */
+            reason: string;
         };
         CreateCategoryDto: {
             /** @example 加拿大 */
@@ -1159,6 +1191,27 @@ export interface operations {
             };
         };
     };
+    ArticlesController_findWithdrawalBySlug: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WithdrawalNoticeDto"];
+                };
+            };
+        };
+    };
     ArticlesController_preview: {
         parameters: {
             query: {
@@ -1317,7 +1370,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApproveArticleDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -1384,7 +1441,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WithdrawArticleDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {

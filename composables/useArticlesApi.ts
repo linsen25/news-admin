@@ -54,10 +54,10 @@ export const useArticlesApi = () => {
     create,
     update,
     submit: (id: string) => action(id, 'submit'),
-    approve: (id: string) => action(id, 'approve'),
+    approve: (id: string, comment?: string) => action(id, 'approve', comment ? { comment } : undefined),
     reject: (id: string, comment: string) => action(id, 'reject', { comment }),
     publish: (id: string) => action(id, 'publish'),
-    withdraw: (id: string) => action(id, 'withdraw'),
+    withdraw: (id: string, reason: string) => action(id, 'withdraw', { reason }),
     history,
     createPreviewToken,
   };

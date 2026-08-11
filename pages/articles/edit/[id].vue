@@ -2,7 +2,7 @@
   <div>
     <div class="page-heading">
       <div><p class="eyebrow">EDIT ARTICLE</p><h1>编辑文章</h1></div>
-      <button v-if="article && (article.status === 'published' || article.hasPublishedVersion)" class="button danger" type="button" @click="withdrawOpen=true">撤稿</button>
+      <button v-if="article && hasPermission('articles.withdraw') && (article.status === 'published' || article.hasPublishedVersion)" class="button danger" type="button" @click="openWithdraw">撤稿</button>
     </div>
     <ArticleForm
       v-if="article && canEdit"
@@ -31,7 +31,7 @@
     </section>
 
     <div v-if="withdrawOpen" class="modal-backdrop" @click.self="withdrawOpen=false">
-      <section class="modal-card"><p class="eyebrow">WITHDRAW ARTICLE</p><h2>确认撤下《{{ article?.title }}》？</h2><p class="muted">撤稿后文章会立即从前台消失，但稿件、历史和媒体引用都会保留。再次上线必须重新编辑、审核并发布。</p><div class="modal-actions"><button class="button secondary" type="button" @click="withdrawOpen=false">取消</button><button class="button danger" type="button" :disabled="withdrawing" @click="confirmWithdraw">{{ withdrawing ? '撤稿中…' : '确认撤稿' }}</button></div></section>
+      <form class="modal-card" @submit.prevent="confirmWithdraw"><p class="eyebrow">WITHDRAW ARTICLE</p><h2>确认撤下《{{ article?.title }}》？</h2><p class="muted">撤稿后原网址会保留公开撤稿声明，但不会继续展示正文。稿件、历史和媒体引用都会保留。</p><label>撤稿原因<textarea v-model="withdrawReason" required minlength="2" rows="4" placeholder="例如：部分事实需要进一步核实。" /></label><div class="modal-actions"><button class="button secondary" type="button" @click="withdrawOpen=false">取消</button><button class="button danger" type="submit" :disabled="withdrawing || withdrawReason.trim().length < 2">{{ withdrawing ? '撤稿中…' : '确认撤稿' }}</button></div></form>
     </div>
   </div>
 </template>
@@ -41,6 +41,7 @@ import type { ArticleInput } from '~/types/article';
 definePageMeta({ middleware: ['auth', 'edit-access'] });
 const route = useRoute();
 const { get, update, submit, withdraw, history, createPreviewToken } = useArticlesApi();
+const { hasPermission } = useAuth();
 const { success, error } = useToast();
 const id = String(route.params.id);
 const { data: article } = await useAsyncData(`article-${id}`, () => get(id));
@@ -51,6 +52,8 @@ const { data: reviewHistory, refresh: refreshHistory } = await useAsyncData(
 const saving = ref(false);
 const withdrawOpen = ref(false);
 const withdrawing = ref(false);
+const withdrawReason = ref('');
+const openWithdraw = () => { withdrawReason.value = ''; withdrawOpen.value = true; };
 const config = useRuntimeConfig();
 const initial = computed<Partial<ArticleInput> | undefined>(() => article.value ? ({
   title: article.value.title,
@@ -73,7 +76,7 @@ const canEdit = computed(() => article.value ? ['draft', 'rejected', 'published'
 const confirmWithdraw = async () => {
   if (!article.value) return;
   withdrawing.value = true;
-  try { article.value = await withdraw(article.value.id); withdrawOpen.value = false; success('文章已撤稿，前台已停止展示'); await refreshHistory(); await refreshNuxtData(['articles','dashboard-articles']); }
+  try { article.value = await withdraw(article.value.id, withdrawReason.value.trim()); withdrawOpen.value = false; success('文章已撤稿，原网址已显示撤稿声明'); await refreshHistory(); await refreshNuxtData(['articles','dashboard-articles']); }
   catch (exception) { error(getApiErrorMessage(exception)); }
   finally { withdrawing.value = false; }
 };

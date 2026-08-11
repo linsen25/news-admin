@@ -9,14 +9,14 @@
         <div v-for="article in reviewArticles" :key="article.id" class="table-row">
           <div>
             <strong>{{ article.title }}</strong>
-            <small>署名：{{ article.byline }} · 录入：{{ article.author.name }}</small>
+            <small>署名：{{ article.byline || '未署名' }} · 录入：{{ article.author.name }}</small>
           </div>
           <StatusBadge :status="article.status" />
           <span>{{ new Date(article.createdAt).toLocaleDateString('zh-CN') }}</span>
           <div class="row-actions">
             <button @click="openPreview(article.id)">预览</button>
             <button @click="showHistory(article.id, article.title)">历史</button>
-            <button v-if="article.status === 'review'" class="approve" @click="requestApprove(article.id)">{{ hasPermission('articles.review.decide') ? '通过' : '🔒 通过' }}</button>
+            <button v-if="article.status === 'review'" class="approve" @click="requestApprove(article.id, article.title)">{{ hasPermission('articles.review.decide') ? '通过' : '🔒 通过' }}</button>
             <button v-if="['review', 'approved'].includes(article.status)" class="reject" @click="requestReject(article.id, article.title)">{{ hasPermission('articles.review.decide') ? '退回' : '🔒 退回' }}</button>
             <button v-if="article.status === 'approved'" class="publish-small" @click="requestPublish(article.id)">{{ hasPermission('articles.publish') ? '发布' : '🔒 发布' }}</button>
           </div>
@@ -43,6 +43,10 @@
           <button class="button danger" type="submit" :disabled="busy">确认退回</button>
         </div>
       </form>
+    </div>
+
+    <div v-if="approveTarget" class="modal-backdrop" @click.self="closeApprove">
+      <form class="modal-card" @submit.prevent="confirmApprove"><p class="eyebrow">APPROVE ARTICLE</p><h2>通过《{{ approveTarget.title }}》</h2><p class="muted">通过意见为可选内容，将保存在审核历史中。</p><label>通过意见（可选）<textarea v-model="approveComment" rows="4" placeholder="例如：已核对事实来源，同意发布。" /></label><div class="modal-actions"><button class="button secondary" type="button" @click="closeApprove">取消</button><button class="button primary" type="submit" :disabled="busy">确认通过</button></div></form>
     </div>
 
     <div v-if="historyTarget" class="modal-backdrop" @click.self="historyTarget = null">
@@ -89,6 +93,8 @@ const totalPages = computed(() => Math.max(1, Math.ceil(pageData.value.total / p
 const busy = ref(false);
 const rejectTarget = ref<{ id: string; title: string } | null>(null);
 const rejectComment = ref('');
+const approveTarget = ref<{ id:string; title:string } | null>(null);
+const approveComment = ref('');
 const historyTarget = ref<{
   title: string;
   data: Awaited<ReturnType<typeof history>>;
@@ -115,9 +121,17 @@ const openReject = (id: string, title: string) => {
   rejectTarget.value = { id, title };
   rejectComment.value = '';
 };
-const requestApprove = (id: string) => {
+const requestApprove = (id: string, title: string) => {
   if (!hasPermission('articles.review.decide')) return permissionNotice.open('审核通过文章', '审核文章权限');
-  return decide(id, 'approve');
+  approveTarget.value = { id, title }; approveComment.value = '';
+};
+const closeApprove = () => { approveTarget.value = null; approveComment.value = ''; };
+const confirmApprove = async () => {
+  if (!approveTarget.value) return;
+  busy.value = true;
+  try { await approve(approveTarget.value.id, approveComment.value.trim() || undefined); success('文章审核通过'); closeApprove(); await refresh(); }
+  catch (exception) { error(getApiErrorMessage(exception)); }
+  finally { busy.value = false; }
 };
 const requestReject = (id: string, title: string) => {
   if (!hasPermission('articles.review.decide')) return permissionNotice.open('退回文章', '审核文章权限');
