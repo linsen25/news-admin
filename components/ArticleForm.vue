@@ -19,7 +19,7 @@
         <legend>文章分类 <small>单选</small></legend>
         <div class="article-category-options">
           <label v-for="category in categoryOptions" :key="category.id" class="taxonomy-option" :class="{ selected: form.categoryId === category.id }">
-            <input v-model="form.categoryId" type="radio" :value="category.id">
+            <input v-model="form.categoryId" type="radio" :value="category.id" required>
             <span class="taxonomy-control"></span>
             <span><strong>{{ category.name }}</strong><small>新闻分类</small></span>
           </label>
@@ -32,6 +32,11 @@
           <label v-for="tag in availableTags" :key="tag.id" class="tag-option" :class="{ selected: form.tagIds.includes(tag.id) }"><input v-model="form.tagIds" type="checkbox" :value="tag.id"><span># {{ tag.name }}</span></label>
         </div>
         <small v-if="form.categoryId && !availableTags.length">当前分类暂无标签，请由管理员在“分类与标签”中创建。</small>
+        <div v-if="form.categoryId" class="custom-tag-create">
+          <input v-model="customTagName" maxlength="50" placeholder="添加当前分类下的自定义标签" @keydown.enter.prevent="addCustomTag">
+          <button class="button secondary" type="button" :disabled="creatingTag || !customTagName.trim()" @click="addCustomTag">{{ creatingTag ? '添加中…' : '＋ 添加' }}</button>
+        </div>
+        <small class="field-help">至少选择一个标签；自定义标签会保存到当前分类，之后可以继续复用。</small>
       </fieldset>
 
       <div class="cover-upload-block">
@@ -68,7 +73,9 @@ const toast = useToast();
 const coverInput = ref<HTMLInputElement | null>(null);
 const coverUploading = ref(false);
 const { data: categories } = await useAsyncData('admin-categories', catalogApi.categories, { default: () => [] });
-const { data: tags } = await useAsyncData('admin-tags', catalogApi.tags, { default: () => [] });
+const { data: tags, refresh: refreshTags } = await useAsyncData('admin-tags', catalogApi.tags, { default: () => [] });
+const customTagName = ref('');
+const creatingTag = ref(false);
 const actorId = user.value?.id ?? 'user-author';
 const categoryOptions = computed(() => [...categories.value].sort((a, b) => a.name.localeCompare(b.name, 'zh-CN')));
 const availableTags = computed(() => tags.value.filter((tag) => tag.categoryId === form.categoryId));
@@ -102,11 +109,26 @@ const uploadCover = async (event: Event) => {
   finally { coverUploading.value = false; input.value = ''; }
 };
 const setKeywords = (event: Event) => { form.keywords = (event.target as HTMLInputElement).value.split(',').map((value) => value.trim()).filter(Boolean); };
+const addCustomTag = async () => {
+  const name = customTagName.value.trim();
+  if (!name || !form.categoryId) return;
+  creatingTag.value = true;
+  try {
+    const created = await catalogApi.createCustomTag(name, form.categoryId);
+    await refreshTags();
+    if (!form.tagIds.includes(created.id)) form.tagIds.push(created.id);
+    customTagName.value = '';
+    toast.success('自定义标签已添加并选中');
+  } catch (exception) { toast.error(getApiErrorMessage(exception)); }
+  finally { creatingTag.value = false; }
+};
 watch(() => props.initial, (value) => value && Object.assign(form, value), { deep: true });
 watchEffect(() => { if (!categories.value.some((item) => item.id === form.categoryId) && categories.value[0]) form.categoryId = categories.value[0].id; });
 watch(() => form.categoryId, () => { form.tagIds = form.tagIds.filter((id) => availableTags.value.some((tag) => tag.id === id)); });
 const emitAction = (action: 'save' | 'preview' | 'submit') => {
-  if (!form.title.trim()) return;
+  if (!form.title.trim()) return toast.error('请填写文章标题');
+  if (!form.categoryId) return toast.error('请选择一个文章分类');
+  if (!form.tagIds.length) return toast.error('请至少选择一个文章标签');
   emit(action === 'submit' ? 'submitReview' : action, { ...form, content: structuredClone(toRaw(form.content)), keywords: [...form.keywords], tagIds: [...form.tagIds], status: 'draft' });
 };
 </script>

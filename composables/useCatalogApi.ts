@@ -45,6 +45,10 @@ export const useCatalogApi = () => {
       method: 'DELETE',
       headers: authHeaders(),
     });
+  const createCustomTag = (name: string, categoryId: string) =>
+    $fetch<CatalogItem>(`${config.public.apiBase}/tags/custom`, {
+      method: 'POST', body: { name, categoryId }, headers: authHeaders(),
+    });
 
-  return { categories, tags, createCategory, updateCategory, deleteCategory, createTag, updateTag, deleteTag };
+  return { categories, tags, createCategory, updateCategory, deleteCategory, createTag, updateTag, deleteTag, createCustomTag };
 };

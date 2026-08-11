@@ -7,7 +7,7 @@
     <section class="panel">
       <div class="filter-row">
         <input v-model="query" placeholder="搜索标题或摘要">
-        <span class="select-control"><select v-model="status"><option value="">全部状态</option><option value="draft">草稿</option><option value="review">审核中</option><option value="approved">已通过</option><option value="rejected">已退回</option><option value="published">已发布</option></select></span>
+        <AppSelect v-model="status" :options="statusOptions" placeholder="全部状态" allow-empty />
       </div>
       <div class="article-table">
         <div class="table-head"><span>标题</span><span>状态</span><span>更新时间</span><span>操作</span></div>
@@ -30,6 +30,7 @@ const router = useRouter();
 const { hasPermission } = useAuth();
 const query = ref('');
 const status = ref(String(route.query.status || ''));
+const statusOptions = [{ value:'draft', label:'草稿' }, { value:'review', label:'审核中' }, { value:'approved', label:'已通过' }, { value:'rejected', label:'已退回' }, { value:'published', label:'已发布' }];
 const { list } = useArticlesApi();
 const { data: articles } = await useAsyncData('articles', list, { default: () => [] });
 watch(() => route.query.status, (value) => { status.value = String(value || ''); });

@@ -10,6 +10,15 @@ input,textarea,select { width:100%; border:1px solid var(--line); border-radius:
 .select-control::after { content:'⌄'; position:absolute; right:13px; top:50%; transform:translateY(-55%); color:var(--green); pointer-events:none; font-size:18px; }
 .select-control select { appearance:none; padding-right:40px; border-color:#bdcbc4; background:linear-gradient(180deg,#fff,#f8faf8); cursor:pointer; }
 .select-control select:focus { outline:2px solid rgba(23,76,59,.16); border-color:var(--green); }
+.app-select { position:relative; width:100%; }
+.app-select-trigger { width:100%; min-height:44px; display:flex; align-items:center; justify-content:space-between; padding:10px 13px; border:1px solid #bdcbc4; border-radius:9px; background:linear-gradient(180deg,#fff,#f8faf8); color:var(--ink); text-align:left; cursor:pointer; }
+.app-select.open .app-select-trigger { border-color:var(--green); box-shadow:0 0 0 3px rgba(23,76,59,.12); }
+.app-select-trigger .placeholder { color:var(--muted); }
+.app-select-chevron { color:var(--green); font-size:19px; transition:transform .18s; }
+.app-select.open .app-select-chevron { transform:rotate(180deg); }
+.app-select-menu { position:absolute; z-index:30; top:calc(100% + 6px); left:0; right:0; max-height:280px; overflow:auto; padding:6px; border:1px solid var(--line); border-radius:11px; background:white; box-shadow:0 16px 38px rgba(21,40,32,.16); }
+.app-select-menu button { width:100%; padding:10px 11px; border:0; border-radius:7px; background:transparent; color:var(--ink); text-align:left; cursor:pointer; }
+.app-select-menu button:hover,.app-select-menu button.selected { background:#eaf2ee; color:var(--green); font-weight:700; }
 label { display:grid; gap:8px; color:#3b4541; font-size:14px; font-weight:600; }
 .admin-shell { min-height:100vh; display:grid; grid-template-columns:230px 1fr; }
 .sidebar { position:sticky; top:0; height:100vh; background:#102d25; color:#dcebe5; padding:28px 22px; display:flex; flex-direction:column; }
@@ -66,7 +75,20 @@ h2 { font-size:18px; }
 .editor-toolbar button { border:1px solid transparent; border-radius:5px; padding:5px 8px; background:transparent; cursor:pointer; }
 .editor-toolbar button:hover,.editor-toolbar button.active { color:var(--green); border-color:#afc3ba; background:#e8f1ed; }
 .editor-toolbar button:disabled { opacity:.35; cursor:not-allowed; }
-.rich-editor .tiptap { min-height:380px; padding:20px; outline:0; font-size:16px; line-height:1.8; }
+.rich-editor .tiptap { min-height:380px; padding:20px; outline:0; font-size:16px; font-weight:400; line-height:1.9; user-select:text; caret-color:var(--green); }
+.rich-editor .tiptap strong { font-weight:800; color:#08140f; }
+.bold-tool b { font-weight:900; }
+.editor-toolbar .toolbar-spacer { flex:1; }
+.editor-toolbar .history-tool { min-width:34px; font-size:24px; line-height:1; }
+.editor-modal-layer { z-index:80; }
+.editor-dialog { max-width:680px; }
+.media-picker-dialog { max-width:850px; max-height:88vh; overflow:auto; }
+.media-picker-actions { margin-bottom:14px; }
+.media-picker-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; max-height:340px; overflow:auto; margin-bottom:18px; }
+.media-picker-grid button { padding:5px; border:2px solid transparent; border-radius:9px; background:#f2f5f2; cursor:pointer; text-align:left; }
+.media-picker-grid button.selected { border-color:var(--green); background:#e8f1ed; }
+.media-picker-grid img { width:100%; height:100px; object-fit:cover; border-radius:5px; }
+.media-picker-grid span { display:block; overflow:hidden; padding:6px 3px 2px; font-size:11px; text-overflow:ellipsis; white-space:nowrap; }
 .rich-editor .tiptap h2 { font-size:26px; margin:1.2em 0 .5em; }
 .rich-editor .tiptap h3 { font-size:20px; margin:1em 0 .4em; }
 .rich-editor .tiptap blockquote { margin:20px 0; padding-left:18px; border-left:4px solid var(--green); color:#4e5e57; }
@@ -95,6 +117,8 @@ h2 { font-size:18px; }
 .article-tag-options { display:flex; flex-wrap:wrap; gap:8px; }
 .tag-option { padding:7px 10px!important; border:1px solid var(--line); border-radius:99px; background:#fafbf9; color:var(--muted); cursor:pointer; font-weight:500!important; }
 .tag-option:hover,.tag-option.selected { border-color:var(--green); background:var(--green); color:white; }
+.custom-tag-create { display:grid; grid-template-columns:1fr auto; gap:8px; margin-top:12px; }
+.custom-tag-create .button { white-space:nowrap; }
 .button.publish { background:#d7ff65; color:#153328; }
 .button.text { padding:5px; color:var(--muted); }
 .status-line { display:flex; align-items:center; gap:8px; margin:0; color:var(--muted); font-size:13px; }

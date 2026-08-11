@@ -32,7 +32,7 @@
       <div class="taxonomy-heading"><div><p class="eyebrow">TAGS</p><h2>标签管理</h2></div><span>独立标签，不从属于分类</span></div>
       <form v-if="canManage" class="taxonomy-form tag-form" @submit.prevent="saveTag">
         <label>标签名称<input v-model="tagDraft.name" required maxlength="50" placeholder="例如：加拿大经济"></label>
-        <label>所属分类<span class="select-control"><select v-model="tagDraft.categoryId" required><option disabled value="">请选择分类</option><option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option></select></span></label>
+        <label>所属分类<AppSelect v-model="tagDraft.categoryId" :options="categorySelectOptions" placeholder="请选择分类" /></label>
         <div class="tag-form-actions"><button class="button primary" :disabled="tagSaving">{{ tagSaving ? '保存中…' : tagEditingId ? '保存修改' : '新增标签' }}</button><button v-if="tagEditingId" class="button secondary" type="button" @click="resetTag">取消</button></div>
         <details class="slug-setting"><summary>自定义网址标识（可选）</summary><label>网址标识<input v-model="tagDraft.slug" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="留空将自动生成"></label><small>一般不需要填写；系统会自动生成唯一标识。</small></details>
       </form>
@@ -57,6 +57,7 @@ const permissionNotice = usePermissionNotice();
 const canManage = computed(() => hasPermission('users.permissions.manage'));
 const { data: categories, refresh: refreshCategories } = await useAsyncData('managed-categories', api.categories, { default: () => [] });
 const { data: tags, refresh: refreshTags } = await useAsyncData('managed-tags', api.tags, { default: () => [] });
+const categorySelectOptions = computed(() => categories.value.map((category) => ({ value: category.id, label: category.name })));
 
 const categoryEditingId = ref(''); const categorySaving = ref(false);
 const categoryDraft = reactive({ name: '', slug: '' });
