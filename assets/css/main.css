@@ -6,6 +6,8 @@ body { margin:0; color:var(--ink); background:var(--paper); font-family:'Noto Sa
 a { color:inherit; text-decoration:none; }
 button,input,textarea,select { font:inherit; }
 input,textarea,select { width:100%; border:1px solid var(--line); border-radius:8px; padding:11px 12px; background:#fff; color:var(--ink); }
+.form-field { display:grid; gap:7px; }
+.field-label { font-size:14px; font-weight:600; }
 .select-control { position:relative; display:block; }
 .select-control::after { content:'⌄'; position:absolute; right:13px; top:50%; transform:translateY(-55%); color:var(--green); pointer-events:none; font-size:18px; }
 .select-control select { appearance:none; padding-right:40px; border-color:#bdcbc4; background:linear-gradient(180deg,#fff,#f8faf8); cursor:pointer; }

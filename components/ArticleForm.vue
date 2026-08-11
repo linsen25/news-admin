@@ -3,7 +3,10 @@
     <section class="panel form-main">
       <label>文章标题<input v-model="form.title" required placeholder="输入清晰、准确的新闻标题"></label>
       <label>摘要<textarea v-model="form.summary" rows="3" placeholder="用一至两句话概括文章重点，将显示在新闻列表中"></textarea></label>
-      <label>正文内容<RichTextEditor v-model="form.content" /></label>
+      <div class="form-field">
+        <span class="field-label">正文内容</span>
+        <RichTextEditor v-model="form.content" />
+      </div>
       <details class="seo-fields">
         <summary>搜索引擎设置（SEO）<small>可选，留空时自动使用标题和摘要</small></summary>
         <p class="seo-help">这些内容主要提供给 Google、Bing 等搜索引擎，不会替代文章页面上的标题和摘要。</p>
