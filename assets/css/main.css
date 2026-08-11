@@ -74,6 +74,10 @@ h2 { font-size:18px; }
 .login-copy { background:#d7ff65; padding:65px 50px; }
 .login-copy h1 { font-size:48px; line-height:1.12; }
 .login-form { display:grid; align-content:center; gap:18px; padding:55px; }
+.password-field { position:relative; display:block; }
+.password-field input { width:100%; padding-right:46px; }
+.password-toggle { position:absolute; top:50%; right:8px; width:34px; height:34px; transform:translateY(-50%); border:0; border-radius:50%; background:transparent; color:var(--muted); cursor:pointer; font-size:20px; line-height:1; }
+.password-toggle:hover { background:#eef0ed; color:var(--ink); }
 .login-form small { text-align:center; }
 .error { color:#a52828; font-size:13px; }
 .mock-accounts { display:grid; gap:5px; padding:10px; background:#f4f6f3; border-radius:7px; font-size:11px; }
