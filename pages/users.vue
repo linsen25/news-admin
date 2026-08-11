@@ -2,7 +2,8 @@
   <div>
     <div class="page-heading">
       <div><p class="eyebrow">ACCOUNTS</p><h1>账号管理</h1></div>
-      <span v-if="!canManage" class="readonly-label">🔒 只读模式</span>
+      <button v-if="canManage" class="button primary" type="button" @click="createOpen = true">＋ 创建用户</button>
+      <span v-else class="readonly-label">🔒 只读模式</span>
     </div>
     <section v-if="accountsError || rolesError" class="panel data-error">
       <strong>账号数据加载失败</strong>
@@ -32,6 +33,18 @@
         </button>
       </article>
     </section>
+
+    <div v-if="createOpen" class="modal-backdrop" @click.self="closeCreate">
+      <form class="modal-card role-confirm-modal" @submit.prevent="createAccount">
+        <p class="eyebrow">NEW ACCOUNT</p><h2>创建后台用户</h2>
+        <p class="muted">只有管理员可以创建账号。新用户登录后将获得所选角色对应的权限。</p>
+        <label>姓名<input v-model="newAccount.username" required maxlength="60" placeholder="例如：王编辑"></label>
+        <label>邮箱<input v-model="newAccount.email" type="email" required autocomplete="off" placeholder="name@example.com"></label>
+        <label>初始密码<span class="password-field"><input v-model="newAccount.password" :type="showCreatePassword ? 'text' : 'password'" required minlength="6" autocomplete="new-password"><button type="button" class="password-toggle" @click="showCreatePassword=!showCreatePassword">{{ showCreatePassword ? '◉' : '◎' }}</button></span></label>
+        <fieldset class="role-selector create-role-selector"><legend>分配角色（可多选）</legend><label v-for="role in roles" :key="role.id" class="role-option" :class="{ selected:newAccount.roleIds.includes(role.id) }"><input v-model="newAccount.roleIds" type="checkbox" :value="role.id"><span class="role-check">✓</span><span><strong>{{ roleMeta[role.name]?.label || role.name }}</strong><small>{{ roleMeta[role.name]?.description }}</small></span></label></fieldset>
+        <div class="modal-actions"><button class="button secondary" type="button" :disabled="creating" @click="closeCreate">取消</button><button class="button primary" type="submit" :disabled="creating || !newAccount.roleIds.length">{{ creating ? '创建中…' : '创建用户' }}</button></div>
+      </form>
+    </div>
 
     <div v-if="confirmTarget" class="modal-backdrop" @click.self="closeConfirmation">
       <form class="modal-card role-confirm-modal" @submit.prevent="confirmSave">
@@ -72,6 +85,8 @@ const saving = ref('');
 const confirmTarget = ref<AccountDTO | null>(null);
 const showPassword = ref(false);
 const credentials = reactive({ email: '', password: '' });
+const createOpen = ref(false); const creating = ref(false); const showCreatePassword = ref(false);
+const newAccount = reactive({ username:'', email:'', password:'', roleIds:[] as string[] });
 const selectedRoles = reactive<Record<string, string[]>>({});
 const roleMeta: Record<string, { label: string; description: string }> = {
   Author: { label: '作者', description: '创建、编辑并提交自己的文章' },
@@ -83,6 +98,14 @@ const [{ data: accounts, error: accountsError, refresh: refreshAccounts }, { dat
   useAsyncData('account-roles', () => $fetch<RoleDTO[]>(`${config.public.apiBase}/users/roles`, { headers: authHeaders() }), { default: () => [] }),
 ]);
 const reloadAccounts = async () => { await Promise.all([refreshAccounts(), refreshRoles()]); };
+const closeCreate = () => { if (creating.value) return; createOpen.value=false; Object.assign(newAccount,{ username:'', email:'', password:'', roleIds:[] }); showCreatePassword.value=false; };
+const createAccount = async () => {
+  if (!canManage.value) return permissionNotice.open('创建后台用户', '账号及权限管理权限（管理员）');
+  creating.value=true;
+  try { await $fetch(`${config.public.apiBase}/users`, { method:'POST', headers:authHeaders(), body:newAccount }); toast.success('后台用户创建成功'); createOpen.value=false; Object.assign(newAccount,{ username:'', email:'', password:'', roleIds:[] }); await refreshAccounts(); }
+  catch(exception) { toast.error(getApiErrorMessage(exception)); }
+  finally { creating.value=false; }
+};
 watchEffect(() => { for (const account of accounts.value) if (!selectedRoles[account.id]) selectedRoles[account.id] = account.roles.map((role) => role.id); });
 const toggleRole = (userId: string, roleId: string) => { const current = selectedRoles[userId] || []; selectedRoles[userId] = current.includes(roleId) ? current.filter((id) => id !== roleId) : [...current, roleId]; };
 const permissionsFor = (userId: string) => Array.from(new Map(roles.value.filter((role) => (selectedRoles[userId] || []).includes(role.id)).flatMap((role) => role.permissions).map((permission) => [permission.key, permission])).values());

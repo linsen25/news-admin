@@ -58,7 +58,6 @@ const mediaAssets = ref<MediaAssetDTO[]>([]); const selectedAsset = ref<MediaAss
 const imageAlt = ref(''); const imageCaption = ref('');
 
 onMounted(() => { editor.value = new Editor({ extensions:[StarterKit.configure({ link:false }), Link.configure({ openOnClick:false }), MediaImage], content:props.modelValue, onUpdate:({ editor:current }) => emit('update:modelValue', current.getJSON() as TipTapDocument) }); });
-watch(() => props.modelValue, (value) => { if (editor.value && JSON.stringify(editor.value.getJSON()) !== JSON.stringify(value)) editor.value.commands.setContent(value); }, { deep:true });
 const command = (type:string, level?:number) => { const chain = editor.value?.chain().focus(); if (!chain) return; if (type==='heading') chain.toggleHeading({ level:level as 2|3 }).run(); else if (type==='bold') chain.toggleBold().run(); else if (type==='italic') chain.toggleItalic().run(); else if (type==='quote') chain.toggleBlockquote().run(); else if (type==='bullet') chain.toggleBulletList().run(); else chain.toggleOrderedList().run(); };
 const rememberSelection = () => { if (editor.value) savedSelection.value = { from:editor.value.state.selection.from, to:editor.value.state.selection.to }; };
 const openLink = () => { if (!editor.value) return; if (editor.value.state.selection.empty) return toast.error('请先拖动鼠标选中需要添加链接的文字'); rememberSelection(); linkHref.value = String(editor.value.getAttributes('link').href || ''); linkOpen.value = true; };

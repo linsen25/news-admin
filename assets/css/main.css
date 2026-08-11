@@ -74,6 +74,8 @@ h2 { font-size:18px; }
 .editor-toolbar { display:flex; flex-wrap:wrap; gap:5px; border-bottom:1px solid var(--line); padding:8px; color:var(--muted); background:#fafbfa; font-weight:400; }
 .editor-toolbar button { border:1px solid transparent; border-radius:5px; padding:5px 8px; background:transparent; cursor:pointer; }
 .editor-toolbar button:hover,.editor-toolbar button.active { color:var(--green); border-color:#afc3ba; background:#e8f1ed; }
+.editor-toolbar button:focus { outline:none; }
+.editor-toolbar button:focus-visible { box-shadow:0 0 0 2px rgba(23,76,59,.28); }
 .editor-toolbar button:disabled { opacity:.35; cursor:not-allowed; }
 .rich-editor .tiptap { min-height:380px; padding:20px; outline:0; font-size:16px; font-weight:400; line-height:1.9; user-select:text; caret-color:var(--green); }
 .rich-editor .tiptap strong { font-weight:800; color:#08140f; }
@@ -161,6 +163,7 @@ h2 { font-size:18px; }
 .confirmation-summary { display:grid; gap:6px; margin-top:15px; padding:13px 15px; border-radius:8px; background:#f2f5f2; }
 .confirmation-summary span { color:var(--muted); font-size:11px; }
 .role-confirm-modal { display:grid; gap:16px; }
+.create-role-selector { margin:4px 0 18px; }
 .nav-lock { float:right; opacity:.65; font-size:12px; }
 .readonly-label { color:var(--muted); font-size:13px; }
 .button.disabled { opacity:.55; cursor:not-allowed; }
