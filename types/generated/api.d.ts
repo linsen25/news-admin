@@ -594,6 +594,11 @@ export interface components {
             id: string;
             /** @example 林作者 */
             name: string;
+            /**
+             * @description English display name; clients fall back to name when empty
+             * @example Technology
+             */
+            nameEn: string;
             /** @example ai */
             slug: string;
             /** @example category-technology */
@@ -604,6 +609,11 @@ export interface components {
             id: string;
             /** @example 林作者 */
             name: string;
+            /**
+             * @description English display name; clients fall back to name when empty
+             * @example Technology
+             */
+            nameEn: string;
             /** @example ai */
             slug: string;
             /** @example category-technology */
@@ -787,12 +797,16 @@ export interface components {
         CreateCategoryDto: {
             /** @example 加拿大 */
             name: string;
+            /** @example Canada */
+            nameEn: string;
             /** @example canada */
             slug: string;
         };
         UpdateCategoryDto: {
             /** @example 加拿大 */
             name?: string;
+            /** @example Canada */
+            nameEn?: string;
             /** @example canada */
             slug?: string;
         };
@@ -805,6 +819,8 @@ export interface components {
         CreateTagDto: {
             /** @example 加拿大经济 */
             name: string;
+            /** @example Canadian Economy */
+            nameEn: string;
             /** @example canada-economy */
             slug: string;
             /** @example cat-tech */
@@ -813,6 +829,8 @@ export interface components {
         UpdateTagDto: {
             /** @example 加拿大经济 */
             name?: string;
+            /** @example Canadian Economy */
+            nameEn?: string;
             /** @example canada-economy */
             slug?: string;
             /** @example cat-tech */

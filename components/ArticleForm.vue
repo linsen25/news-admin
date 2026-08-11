@@ -28,7 +28,7 @@
           <label v-for="category in categoryOptions" :key="category.id" class="taxonomy-option" :class="{ selected: form.categoryId === category.id }">
             <input v-model="form.categoryId" type="radio" :value="category.id" required>
             <span class="taxonomy-control"></span>
-            <span><strong>{{ category.name }}</strong><small>新闻分类</small></span>
+            <span><strong>{{ category.name }}</strong><small>{{ category.nameEn || '新闻分类' }}</small></span>
           </label>
         </div>
         <small v-if="!categories.length">暂无分类，请由管理员在“分类与标签”中创建。</small>
@@ -36,7 +36,7 @@
       <fieldset class="article-taxonomy-field">
         <legend>文章标签 <small>可多选</small></legend>
         <div class="article-tag-options">
-          <label v-for="tag in availableTags" :key="tag.id" class="tag-option" :class="{ selected: form.tagIds.includes(tag.id) }"><input v-model="form.tagIds" type="checkbox" :value="tag.id"><span># {{ tag.name }}</span></label>
+          <label v-for="tag in availableTags" :key="tag.id" class="tag-option" :class="{ selected: form.tagIds.includes(tag.id) }"><input v-model="form.tagIds" type="checkbox" :value="tag.id"><span># {{ tag.name }}<small v-if="tag.nameEn">{{ tag.nameEn }}</small></span></label>
         </div>
         <small v-if="form.categoryId && !availableTags.length">当前分类暂无标签，请由管理员在“分类与标签”中创建。</small>
         <div v-if="form.categoryId" class="custom-tag-create">

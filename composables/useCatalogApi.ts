@@ -1,6 +1,7 @@
 export interface CatalogItem {
   id: string;
   name: string;
+  nameEn: string;
   slug: string;
   parentId?: string | null;
   categoryId?: string | null;
@@ -14,11 +15,11 @@ export const useCatalogApi = () => {
     $fetch<CatalogItem[]>(`${config.public.apiBase}/categories`);
   const tags = () =>
     $fetch<CatalogItem[]>(`${config.public.apiBase}/tags`);
-  const createCategory = (input: Pick<CatalogItem, 'name' | 'slug' | 'parentId'>) =>
+  const createCategory = (input: Pick<CatalogItem, 'name' | 'nameEn' | 'slug' | 'parentId'>) =>
     $fetch<CatalogItem>(`${config.public.apiBase}/categories`, {
       method: 'POST', body: input, headers: authHeaders(),
     });
-  const updateCategory = (id: string, input: Partial<Pick<CatalogItem, 'name' | 'slug' | 'parentId'>>) =>
+  const updateCategory = (id: string, input: Partial<Pick<CatalogItem, 'name' | 'nameEn' | 'slug' | 'parentId'>>) =>
     $fetch<CatalogItem>(`${config.public.apiBase}/categories/${id}`, {
       method: 'PUT', body: input, headers: authHeaders(),
     });
@@ -26,7 +27,7 @@ export const useCatalogApi = () => {
     $fetch<void>(`${config.public.apiBase}/categories/${id}`, {
       method: 'DELETE', headers: authHeaders(),
     });
-  const createTag = (input: Pick<CatalogItem, 'name' | 'slug' | 'categoryId'>) =>
+  const createTag = (input: Pick<CatalogItem, 'name' | 'nameEn' | 'slug' | 'categoryId'>) =>
     $fetch<CatalogItem>(`${config.public.apiBase}/tags`, {
       method: 'POST',
       body: input,
@@ -34,7 +35,7 @@ export const useCatalogApi = () => {
     });
   const updateTag = (
     id: string,
-    input: Partial<Pick<CatalogItem, 'name' | 'slug' | 'categoryId'>>,
+    input: Partial<Pick<CatalogItem, 'name' | 'nameEn' | 'slug' | 'categoryId'>>,
   ) => $fetch<CatalogItem>(`${config.public.apiBase}/tags/${id}`, {
     method: 'PUT',
     body: input,
