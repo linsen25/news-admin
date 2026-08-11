@@ -6,65 +6,89 @@
     </div>
     <section class="users-grid">
       <article v-for="account in accounts" :key="account.id" class="panel user-card">
-        <div class="avatar">{{ account.username.slice(0, 1) }}</div>
-        <div class="user-identity"><h2>{{ account.username }}</h2><p>{{ account.email }}</p></div>
+        <header class="user-card-head">
+          <div class="avatar">{{ account.username.slice(0, 1) }}</div>
+          <div><h2>{{ account.username }}</h2><p>{{ account.email }}</p></div>
+        </header>
         <fieldset class="role-selector" :disabled="!canManage || saving === account.id">
-          <legend>角色（可多选）</legend>
-          <label v-for="role in roles" :key="role.id">
+          <legend>分配角色（可多选）</legend>
+          <label v-for="role in roles" :key="role.id" class="role-option" :class="{ selected: selectedRoles[account.id]?.includes(role.id) }">
             <input type="checkbox" :checked="selectedRoles[account.id]?.includes(role.id)" @change="toggleRole(account.id, role.id)">
-            <span>{{ roleLabels[role.name] || role.name }}</span>
+            <span class="role-check">✓</span>
+            <span><strong>{{ roleMeta[role.name]?.label || role.name }}</strong><small>{{ roleMeta[role.name]?.description }}</small></span>
           </label>
         </fieldset>
-        <div class="permission-list">
-          <strong>合并后的权限</strong>
-          <span v-for="permission in permissionsFor(account.id)" :key="permission.key">{{ permission.description }}</span>
-        </div>
-        <button class="button primary" type="button" :disabled="!canManage || saving === account.id || !selectedRoles[account.id]?.length" :title="canManage ? '' : '你没有管理用户角色的权限'" @click="saveRoles(account.id)">
-          {{ saving === account.id ? '保存中…' : canManage ? '保存角色' : '🔒 仅管理员可修改' }}
+        <details class="permission-details">
+          <summary>查看合并后的权限（{{ permissionsFor(account.id).length }}）</summary>
+          <div class="permission-list"><span v-for="permission in permissionsFor(account.id)" :key="permission.key">{{ permission.description }}</span></div>
+        </details>
+        <button class="button primary" type="button" :disabled="!canManage || saving === account.id || !selectedRoles[account.id]?.length" @click="openConfirmation(account)">
+          {{ canManage ? '保存角色设置' : '🔒 仅管理员可修改' }}
         </button>
       </article>
     </section>
+
+    <div v-if="confirmTarget" class="modal-backdrop" @click.self="closeConfirmation">
+      <form class="modal-card role-confirm-modal" @submit.prevent="confirmSave">
+        <p class="eyebrow">SECURITY CONFIRMATION</p>
+        <h2>确认修改角色</h2>
+        <p class="muted">你正在修改“{{ confirmTarget.username }}”的角色。请输入当前登录管理员的账号和密码确认操作。</p>
+        <label>管理员邮箱<input v-model="credentials.email" type="email" autocomplete="username" required></label>
+        <label>管理员密码
+          <span class="password-field">
+            <input v-model="credentials.password" :type="showPassword ? 'text' : 'password'" autocomplete="current-password" required minlength="6">
+            <button type="button" class="password-toggle" :title="showPassword ? '隐藏密码' : '显示密码'" @click="showPassword = !showPassword">{{ showPassword ? '◉' : '◎' }}</button>
+          </span>
+        </label>
+        <div class="confirmation-summary">
+          <span>将分配角色</span>
+          <strong>{{ selectedRoleLabels(confirmTarget.id) }}</strong>
+        </div>
+        <div class="modal-actions">
+          <button class="button secondary" type="button" :disabled="saving === confirmTarget.id" @click="closeConfirmation">取消</button>
+          <button class="button primary" type="submit" :disabled="saving === confirmTarget.id">{{ saving === confirmTarget.id ? '验证并保存中…' : '确认保存' }}</button>
+        </div>
+      </form>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { components } from '~/types/generated/api';
-
 definePageMeta({ middleware: ['auth'] });
 type AccountDTO = components['schemas']['UserDto'];
 type RoleDTO = components['schemas']['RoleDto'];
 const config = useRuntimeConfig();
-const { authHeaders, hasPermission } = useAuth();
+const { user, authHeaders, hasPermission } = useAuth();
 const toast = useToast();
 const canManage = computed(() => hasPermission('users.permissions.manage'));
 const saving = ref('');
+const confirmTarget = ref<AccountDTO | null>(null);
+const showPassword = ref(false);
+const credentials = reactive({ email: '', password: '' });
 const selectedRoles = reactive<Record<string, string[]>>({});
-const roleLabels: Record<string, string> = { Author: '作者', Reviewer: '审核员', Admin: '管理员' };
-
+const roleMeta: Record<string, { label: string; description: string }> = {
+  Author: { label: '作者', description: '创建、编辑并提交自己的文章' },
+  Reviewer: { label: '审核员', description: '查看、通过或退回待审文章' },
+  Admin: { label: '管理员', description: '管理发布、账号、角色与系统设置' },
+};
 const [{ data: accounts, refresh }, { data: roles }] = await Promise.all([
   useAsyncData('accounts', () => $fetch<AccountDTO[]>(`${config.public.apiBase}/users`, { headers: authHeaders() }), { default: () => [] }),
   useAsyncData('account-roles', () => $fetch<RoleDTO[]>(`${config.public.apiBase}/users/roles`, { headers: authHeaders() }), { default: () => [] }),
 ]);
-
-watchEffect(() => {
-  for (const account of accounts.value) {
-    if (!selectedRoles[account.id]) selectedRoles[account.id] = account.roles.map((role) => role.id);
-  }
-});
-const toggleRole = (userId: string, roleId: string) => {
-  const current = selectedRoles[userId] || [];
-  selectedRoles[userId] = current.includes(roleId) ? current.filter((id) => id !== roleId) : [...current, roleId];
-};
-const permissionsFor = (userId: string) => Array.from(new Map(
-  roles.value.filter((role) => (selectedRoles[userId] || []).includes(role.id)).flatMap((role) => role.permissions)
-    .map((permission) => [permission.key, permission]),
-).values());
-const saveRoles = async (userId: string) => {
-  saving.value = userId;
+watchEffect(() => { for (const account of accounts.value) if (!selectedRoles[account.id]) selectedRoles[account.id] = account.roles.map((role) => role.id); });
+const toggleRole = (userId: string, roleId: string) => { const current = selectedRoles[userId] || []; selectedRoles[userId] = current.includes(roleId) ? current.filter((id) => id !== roleId) : [...current, roleId]; };
+const permissionsFor = (userId: string) => Array.from(new Map(roles.value.filter((role) => (selectedRoles[userId] || []).includes(role.id)).flatMap((role) => role.permissions).map((permission) => [permission.key, permission])).values());
+const selectedRoleLabels = (userId: string) => roles.value.filter((role) => (selectedRoles[userId] || []).includes(role.id)).map((role) => roleMeta[role.name]?.label || role.name).join('、');
+const openConfirmation = (account: AccountDTO) => { confirmTarget.value = account; credentials.email = user.value?.email || ''; credentials.password = ''; showPassword.value = false; };
+const closeConfirmation = () => { if (saving.value) return; confirmTarget.value = null; credentials.password = ''; };
+const confirmSave = async () => {
+  if (!confirmTarget.value) return;
+  const target = confirmTarget.value;
+  saving.value = target.id;
   try {
-    await $fetch(`${config.public.apiBase}/users/${userId}/roles`, { method: 'PUT', headers: authHeaders(), body: { roleIds: selectedRoles[userId] } });
-    toast.success('用户角色已更新');
-    await refresh();
+    await $fetch(`${config.public.apiBase}/users/${target.id}/roles`, { method: 'PUT', headers: authHeaders(), body: { roleIds: selectedRoles[target.id], email: credentials.email, password: credentials.password } });
+    toast.success('用户角色已更新'); confirmTarget.value = null; credentials.password = ''; await refresh();
   } catch (exception) { toast.error(getApiErrorMessage(exception)); }
   finally { saving.value = ''; }
 };

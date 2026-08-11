@@ -488,6 +488,16 @@ export interface components {
              *     ]
              */
             roleIds: string[];
+            /**
+             * @description Current administrator email
+             * @example admin@example.com
+             */
+            email: string;
+            /**
+             * @description Current administrator password
+             * @example 123456
+             */
+            password: string;
         };
         Object: Record<string, never>;
         TipTapMarkDto: {
