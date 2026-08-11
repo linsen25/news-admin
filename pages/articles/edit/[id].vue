@@ -11,8 +11,12 @@
       @preview="preview"
       @submit-review="submitReview"
     />
+    <section v-if="article?.status === 'published'" class="panel published-edit-warning">
+      <strong>正在修改已发布文章</strong>
+      <p>保存或预览修改后，文章将转为草稿并暂时从前台撤下；修改完成后需要重新提交审核和发布。</p>
+    </section>
     <section v-else-if="article" class="panel">
-      当前状态为“{{ article.status }}”，只有草稿或退回文章可以继续编辑。
+      当前状态为“{{ article.status }}”，审核中或已通过的文章需要先完成当前审核流程。
     </section>
     <section v-else class="panel">文章不存在。</section>
 
@@ -57,7 +61,7 @@ const initial = computed<Partial<ArticleInput> | undefined>(() => article.value 
   authorId: article.value.author.id,
   currentEditorId: useAuth().user.value?.id ?? 'user-author',
 }) : undefined);
-const canEdit = computed(() => article.value ? ['draft', 'rejected'].includes(article.value.status) : false);
+const canEdit = computed(() => article.value ? ['draft', 'rejected', 'published'].includes(article.value.status) : false);
 const persist = async (input: ArticleInput) => {
   saving.value = true;
   try {

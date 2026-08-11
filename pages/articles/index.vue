@@ -23,7 +23,7 @@
           <div class="register-taxonomy"><strong>{{ article.category.name }}</strong><StatusBadge :status="article.status" /></div>
           <div class="register-people"><span><small>文章署名</small>{{ article.byline }}</span><span><small>录入负责人</small>{{ article.author.name }}</span><span><small>最近编辑</small>{{ article.currentEditor.name }}</span></div>
           <div class="register-times"><span><small>创建</small>{{ formatTime(article.createdAt) }}</span><span><small>修改</small>{{ formatTime(article.updatedAt) }}</span></div>
-          <NuxtLink class="register-action" :to="`/articles/edit/${article.id}`">{{ ['draft','rejected'].includes(article.status) ? '编辑' : '查看' }} →</NuxtLink>
+          <NuxtLink class="register-action" :to="`/articles/edit/${article.id}`">{{ ['draft','rejected','published'].includes(article.status) ? '编辑' : '查看' }} →</NuxtLink>
         </article>
         <p v-if="!filtered.length" class="empty-state">{{ pageData.total ? '当前筛选条件下没有文章。' : emptyMessage }}</p>
       </div>

@@ -5,7 +5,7 @@
       <label>摘要<textarea v-model="form.summary" rows="3" placeholder="用一至两句话概括文章重点，将显示在新闻列表中"></textarea></label>
       <div class="article-credit-fields">
         <label>文章作者（署名）<input v-model="form.byline" required placeholder="例如：李明、本报通讯员或中加网编辑部"><small>这是前台向读者展示的作者，不会使用你的后台账号名称。</small></label>
-        <label>稿件日期<input v-model="form.articleDate" required type="date"><small>显示在文章页面；系统创建时间和实际发布时间仍会分别记录。</small></label>
+        <label>稿件日期<AppDatePicker v-model="form.articleDate" /><small>显示在文章页面；系统创建时间和实际发布时间仍会分别记录。</small></label>
       </div>
       <div class="form-field">
         <span class="field-label">正文内容</span>
