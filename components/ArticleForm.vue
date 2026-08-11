@@ -21,7 +21,7 @@
           <label v-for="category in categoryOptions" :key="category.id" class="taxonomy-option" :class="{ selected: form.categoryId === category.id }">
             <input v-model="form.categoryId" type="radio" :value="category.id">
             <span class="taxonomy-control"></span>
-            <span><strong>{{ category.name }}</strong><small v-if="category.parentName">{{ category.parentName }}下的子分类</small><small v-else>一级分类</small></span>
+            <span><strong>{{ category.name }}</strong><small>新闻分类</small></span>
           </label>
         </div>
         <small v-if="!categories.length">暂无分类，请由管理员在“分类与标签”中创建。</small>
@@ -70,14 +70,7 @@ const coverUploading = ref(false);
 const { data: categories } = await useAsyncData('admin-categories', catalogApi.categories, { default: () => [] });
 const { data: tags } = await useAsyncData('admin-tags', catalogApi.tags, { default: () => [] });
 const actorId = user.value?.id ?? 'user-author';
-const categoryOptions = computed(() => categories.value.map((category) => ({
-  ...category,
-  parentName: categories.value.find((parent) => parent.id === category.parentId)?.name || '',
-})).sort((a, b) => {
-  const aParent = a.parentName || a.name;
-  const bParent = b.parentName || b.name;
-  return aParent.localeCompare(bParent, 'zh-CN') || Number(Boolean(a.parentId)) - Number(Boolean(b.parentId));
-}));
+const categoryOptions = computed(() => [...categories.value].sort((a, b) => a.name.localeCompare(b.name, 'zh-CN')));
 const form = reactive<ArticleInput>({
   title: props.initial?.title ?? '', slug: props.initial?.slug ?? '', summary: props.initial?.summary ?? '',
   metaTitle: props.initial?.metaTitle ?? '', metaDescription: props.initial?.metaDescription ?? '', keywords: props.initial?.keywords ?? [],
