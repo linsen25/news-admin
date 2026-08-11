@@ -36,8 +36,9 @@
         </div>
         <small v-if="form.categoryId && !availableTags.length">当前分类暂无标签，请由管理员在“分类与标签”中创建。</small>
         <div v-if="form.categoryId" class="custom-tag-create">
-          <input v-model="customTagName" maxlength="50" placeholder="添加当前分类下的自定义标签" @keydown.enter.prevent="addCustomTag">
-          <button class="button secondary" type="button" :disabled="creatingTag || !customTagName.trim()" @click="addCustomTag">{{ creatingTag ? '添加中…' : '＋ 添加' }}</button>
+          <span>没有合适的标签？可以在当前分类下新建自定义标签</span>
+          <input v-model="customTagName" maxlength="50" placeholder="输入新标签名称" @keydown.enter.prevent="addCustomTag">
+          <button class="button secondary" type="button" :disabled="creatingTag || !customTagName.trim()" @click="addCustomTag">{{ creatingTag ? '创建中…' : '创建并选中' }}</button>
         </div>
         <small class="field-help">至少选择一个标签；自定义标签会保存到当前分类，之后可以继续复用。</small>
       </fieldset>

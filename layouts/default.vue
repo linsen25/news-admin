@@ -11,6 +11,9 @@
         <NuxtLink v-if="hasPermission('articles.view.own')" v-slot="{ href, navigate }" to="/articles?status=draft" custom>
           <a :href="href" :class="{ 'sidebar-active': draftsActive }" @click="navigate">草稿箱</a>
         </NuxtLink>
+        <NuxtLink v-if="hasPermission('articles.view.own')" v-slot="{ href, navigate }" to="/articles?status=rejected" custom>
+          <a :href="href" :class="{ 'sidebar-active': rejectedActive }" @click="navigate">退回修改</a>
+        </NuxtLink>
         <NuxtLink to="/review">审阅文章 <span v-if="!hasPermission('articles.review.decide')" class="nav-lock">🔒</span></NuxtLink>
         <NuxtLink to="/media">媒体库 <span v-if="!hasPermission('media.upload')" class="nav-lock">🔒</span></NuxtLink>
         <NuxtLink to="/users">账号管理 <span v-if="!hasPermission('users.permissions.manage')" class="nav-lock">🔒</span></NuxtLink>
@@ -34,8 +37,9 @@
 const { user, logout, hasPermission } = useAuth();
 const route = useRoute();
 const draftsActive = computed(() => route.path === '/articles' && route.query.status === 'draft');
+const rejectedActive = computed(() => route.path === '/articles' && route.query.status === 'rejected');
 const articlesActive = computed(() =>
-  (route.path === '/articles' && route.query.status !== 'draft') || route.path.startsWith('/articles/edit/'),
+  (route.path === '/articles' && !['draft', 'rejected'].includes(String(route.query.status ?? ''))) || route.path.startsWith('/articles/edit/'),
 );
 const roleNames = { Author: '作者', Reviewer: '审核员', Admin: '管理员' } as const;
 const roleLabel = computed(() => user.value?.roles?.map((role) => roleNames[role.name]).join(' / ') || '请重新登录');

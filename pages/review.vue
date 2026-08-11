@@ -57,8 +57,9 @@
         </div>
         <p v-else class="muted">暂无退回意见。</p>
         <h3>操作日志</h3>
+        <p class="muted">连续保存或修改会合并显示；提交、退回、通过和发布等关键节点始终单独保留。</p>
         <div class="timeline">
-          <article v-for="log in historyTarget.data.auditLogs" :key="log.id">
+          <article v-for="log in simplifiedAuditLogs" :key="log.id">
             <strong>{{ log.user.name }}</strong>
             <time>{{ formatTime(log.createdAt) }}</time>
             <p>{{ log.description }}</p>
@@ -87,6 +88,12 @@ const historyTarget = ref<{
   title: string;
   data: Awaited<ReturnType<typeof history>>;
 } | null>(null);
+const simplifiedAuditLogs = computed(() => {
+  const logs = historyTarget.value?.data.auditLogs ?? [];
+  return logs.filter((log, index) =>
+    log.action !== 'UPDATE_ARTICLE' || logs[index - 1]?.action !== 'UPDATE_ARTICLE',
+  );
+});
 
 const openPreview = (id: string) => {
   window.open(`${config.public.webBase}/preview/${id}?token=mock-preview-token`, '_blank');

@@ -132,8 +132,9 @@ h2 { font-size:18px; }
 .article-tag-options { display:flex; flex-wrap:wrap; gap:8px; }
 .tag-option { padding:7px 10px!important; border:1px solid var(--line); border-radius:99px; background:#fafbf9; color:var(--muted); cursor:pointer; font-weight:500!important; }
 .tag-option:hover,.tag-option.selected { border-color:var(--green); background:var(--green); color:white; }
-.custom-tag-create { display:grid; grid-template-columns:1fr auto; gap:8px; margin-top:12px; }
-.custom-tag-create .button { white-space:nowrap; }
+.custom-tag-create { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; margin-top:12px; }
+.custom-tag-create>span { grid-column:1/-1; color:var(--muted); font-size:11px; font-weight:500; }
+.custom-tag-create .button { padding-inline:12px; white-space:nowrap; font-size:12px; }
 .button.publish { background:#d7ff65; color:#153328; }
 .button.text { padding:5px; color:var(--muted); }
 .status-line { display:flex; align-items:center; gap:8px; margin:0; color:var(--muted); font-size:13px; }
