@@ -1,14 +1,14 @@
 <template>
   <div class="rich-editor">
     <div v-if="editor" class="editor-toolbar">
-      <button type="button" title="二级标题" :class="{ active: editor.isActive('heading', { level: 2 }) }" @click="editor.chain().focus().toggleHeading({ level: 2 }).run()">H2</button>
-      <button type="button" title="三级标题" :class="{ active: editor.isActive('heading', { level: 3 }) }" @click="editor.chain().focus().toggleHeading({ level: 3 }).run()">H3</button>
-      <button type="button" title="加粗（Ctrl+B）" :class="{ active: editor.isActive('bold') }" @click="editor.chain().focus().toggleBold().run()"><b>B</b></button>
-      <button type="button" title="斜体（Ctrl+I）" :class="{ active: editor.isActive('italic') }" @click="editor.chain().focus().toggleItalic().run()"><i>I</i></button>
-      <button type="button" title="引用" :class="{ active: editor.isActive('blockquote') }" @click="editor.chain().focus().toggleBlockquote().run()">引用</button>
-      <button type="button" title="项目列表" :class="{ active: editor.isActive('bulletList') }" @click="editor.chain().focus().toggleBulletList().run()">项目列表</button>
-      <button type="button" title="编号列表" :class="{ active: editor.isActive('orderedList') }" @click="editor.chain().focus().toggleOrderedList().run()">编号列表</button>
-      <button type="button" title="添加或编辑链接" :class="{ active: editor.isActive('link') }" @click="setLink">链接</button>
+      <button type="button" title="将光标所在段落设为二级标题" :class="{ active: editor.isActive('heading', { level: 2 }) }" @mousedown.prevent="editor.chain().focus().toggleHeading({ level: 2 }).run()">H2</button>
+      <button type="button" title="将光标所在段落设为三级标题" :class="{ active: editor.isActive('heading', { level: 3 }) }" @mousedown.prevent="editor.chain().focus().toggleHeading({ level: 3 }).run()">H3</button>
+      <button type="button" title="加粗选中文字（Ctrl+B）" :class="{ active: editor.isActive('bold') }" @mousedown.prevent="editor.chain().focus().toggleBold().run()"><b>B</b></button>
+      <button type="button" title="斜体选中文字（Ctrl+I）" :class="{ active: editor.isActive('italic') }" @mousedown.prevent="editor.chain().focus().toggleItalic().run()"><i>I</i></button>
+      <button type="button" title="将光标所在段落设为引用" :class="{ active: editor.isActive('blockquote') }" @mousedown.prevent="editor.chain().focus().toggleBlockquote().run()">引用</button>
+      <button type="button" title="项目列表" :class="{ active: editor.isActive('bulletList') }" @mousedown.prevent="editor.chain().focus().toggleBulletList().run()">项目列表</button>
+      <button type="button" title="编号列表" :class="{ active: editor.isActive('orderedList') }" @mousedown.prevent="editor.chain().focus().toggleOrderedList().run()">编号列表</button>
+      <button type="button" title="给选中文字添加网页链接（不是图片链接）" :class="{ active: editor.isActive('link') }" @mousedown.prevent="setLink">网页链接</button>
       <button type="button" title="上传正文图片" :disabled="uploading" @click="fileInput?.click()">{{ uploading ? '上传中…' : '图片' }}</button>
       <input ref="fileInput" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp,image/gif" @change="uploadImage">
       <button type="button" title="撤销" :disabled="!editor.can().undo()" @click="editor.chain().focus().undo().run()">撤销</button>

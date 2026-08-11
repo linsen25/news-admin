@@ -29,9 +29,9 @@
       <fieldset class="article-taxonomy-field">
         <legend>文章标签 <small>可多选</small></legend>
         <div class="article-tag-options">
-          <label v-for="tag in tags" :key="tag.id" class="tag-option" :class="{ selected: form.tagIds.includes(tag.id) }"><input v-model="form.tagIds" type="checkbox" :value="tag.id"><span># {{ tag.name }}</span></label>
+          <label v-for="tag in availableTags" :key="tag.id" class="tag-option" :class="{ selected: form.tagIds.includes(tag.id) }"><input v-model="form.tagIds" type="checkbox" :value="tag.id"><span># {{ tag.name }}</span></label>
         </div>
-        <small v-if="!tags.length">暂无标签，请由管理员在“分类与标签”中创建。</small>
+        <small v-if="form.categoryId && !availableTags.length">当前分类暂无标签，请由管理员在“分类与标签”中创建。</small>
       </fieldset>
 
       <div class="cover-upload-block">
@@ -71,6 +71,7 @@ const { data: categories } = await useAsyncData('admin-categories', catalogApi.c
 const { data: tags } = await useAsyncData('admin-tags', catalogApi.tags, { default: () => [] });
 const actorId = user.value?.id ?? 'user-author';
 const categoryOptions = computed(() => [...categories.value].sort((a, b) => a.name.localeCompare(b.name, 'zh-CN')));
+const availableTags = computed(() => tags.value.filter((tag) => tag.categoryId === form.categoryId));
 const form = reactive<ArticleInput>({
   title: props.initial?.title ?? '', slug: props.initial?.slug ?? '', summary: props.initial?.summary ?? '',
   metaTitle: props.initial?.metaTitle ?? '', metaDescription: props.initial?.metaDescription ?? '', keywords: props.initial?.keywords ?? [],
@@ -103,6 +104,7 @@ const uploadCover = async (event: Event) => {
 const setKeywords = (event: Event) => { form.keywords = (event.target as HTMLInputElement).value.split(',').map((value) => value.trim()).filter(Boolean); };
 watch(() => props.initial, (value) => value && Object.assign(form, value), { deep: true });
 watchEffect(() => { if (!categories.value.some((item) => item.id === form.categoryId) && categories.value[0]) form.categoryId = categories.value[0].id; });
+watch(() => form.categoryId, () => { form.tagIds = form.tagIds.filter((id) => availableTags.value.some((tag) => tag.id === id)); });
 const emitAction = (action: 'save' | 'preview' | 'submit') => {
   if (!form.title.trim()) return;
   emit(action === 'submit' ? 'submitReview' : action, { ...form, content: structuredClone(toRaw(form.content)), keywords: [...form.keywords], tagIds: [...form.tagIds], status: 'draft' });

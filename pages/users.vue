@@ -4,6 +4,11 @@
       <div><p class="eyebrow">ACCOUNTS</p><h1>账号管理</h1></div>
       <span v-if="!canManage" class="readonly-label">🔒 只读模式</span>
     </div>
+    <section v-if="accountsError || rolesError" class="panel data-error">
+      <strong>账号数据加载失败</strong>
+      <p>{{ getApiErrorMessage(accountsError || rolesError) }}</p>
+      <button class="button secondary" type="button" @click="reloadAccounts">重新加载</button>
+    </section>
     <section class="users-grid">
       <article v-for="account in accounts" :key="account.id" class="panel user-card">
         <header class="user-card-head">
@@ -73,10 +78,11 @@ const roleMeta: Record<string, { label: string; description: string }> = {
   Reviewer: { label: '审核员', description: '查看、通过或退回待审文章' },
   Admin: { label: '管理员', description: '管理发布、账号、角色与系统设置' },
 };
-const [{ data: accounts, refresh }, { data: roles }] = await Promise.all([
+const [{ data: accounts, error: accountsError, refresh: refreshAccounts }, { data: roles, error: rolesError, refresh: refreshRoles }] = await Promise.all([
   useAsyncData('accounts', () => $fetch<AccountDTO[]>(`${config.public.apiBase}/users`, { headers: authHeaders() }), { default: () => [] }),
   useAsyncData('account-roles', () => $fetch<RoleDTO[]>(`${config.public.apiBase}/users/roles`, { headers: authHeaders() }), { default: () => [] }),
 ]);
+const reloadAccounts = async () => { await Promise.all([refreshAccounts(), refreshRoles()]); };
 watchEffect(() => { for (const account of accounts.value) if (!selectedRoles[account.id]) selectedRoles[account.id] = account.roles.map((role) => role.id); });
 const toggleRole = (userId: string, roleId: string) => { const current = selectedRoles[userId] || []; selectedRoles[userId] = current.includes(roleId) ? current.filter((id) => id !== roleId) : [...current, roleId]; };
 const permissionsFor = (userId: string) => Array.from(new Map(roles.value.filter((role) => (selectedRoles[userId] || []).includes(role.id)).flatMap((role) => role.permissions).map((permission) => [permission.key, permission])).values());
@@ -92,7 +98,7 @@ const confirmSave = async () => {
   saving.value = target.id;
   try {
     await $fetch(`${config.public.apiBase}/users/${target.id}/roles`, { method: 'PUT', headers: authHeaders(), body: { roleIds: selectedRoles[target.id], email: credentials.email, password: credentials.password } });
-    toast.success('用户角色已更新'); confirmTarget.value = null; credentials.password = ''; await refresh();
+    toast.success('用户角色已更新'); confirmTarget.value = null; credentials.password = ''; await refreshAccounts();
   } catch (exception) { toast.error(getApiErrorMessage(exception)); }
   finally { saving.value = ''; }
 };

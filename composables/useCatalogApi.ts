@@ -3,6 +3,7 @@ export interface CatalogItem {
   name: string;
   slug: string;
   parentId?: string | null;
+  categoryId?: string | null;
 }
 
 export const useCatalogApi = () => {
@@ -25,7 +26,7 @@ export const useCatalogApi = () => {
     $fetch<void>(`${config.public.apiBase}/categories/${id}`, {
       method: 'DELETE', headers: authHeaders(),
     });
-  const createTag = (input: Pick<CatalogItem, 'name' | 'slug'>) =>
+  const createTag = (input: Pick<CatalogItem, 'name' | 'slug' | 'categoryId'>) =>
     $fetch<CatalogItem>(`${config.public.apiBase}/tags`, {
       method: 'POST',
       body: input,
@@ -33,7 +34,7 @@ export const useCatalogApi = () => {
     });
   const updateTag = (
     id: string,
-    input: Partial<Pick<CatalogItem, 'name' | 'slug'>>,
+    input: Partial<Pick<CatalogItem, 'name' | 'slug' | 'categoryId'>>,
   ) => $fetch<CatalogItem>(`${config.public.apiBase}/tags/${id}`, {
     method: 'PUT',
     body: input,
