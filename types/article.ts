@@ -18,6 +18,10 @@ export type ArticleInput = CreateArticleDTO & {
   status: ArticleStatus;
 };
 
+export type ArticleUpdateInput = Partial<ArticleInput> & {
+  expectedUpdatedAt?: string;
+};
+
 export const emptyDocument = (): TipTapDocument => ({
   type: 'doc',
   content: [{ type: 'paragraph' }],

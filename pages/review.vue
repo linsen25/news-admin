@@ -17,11 +17,16 @@
             <button @click="openPreview(article.id)">预览</button>
             <button @click="showHistory(article.id, article.title)">历史</button>
             <button v-if="article.status === 'review'" class="approve" @click="requestApprove(article.id)">{{ hasPermission('articles.review.decide') ? '通过' : '🔒 通过' }}</button>
-            <button v-if="article.status === 'review'" class="reject" @click="requestReject(article.id, article.title)">{{ hasPermission('articles.review.decide') ? '退回' : '🔒 退回' }}</button>
+            <button v-if="['review', 'approved'].includes(article.status)" class="reject" @click="requestReject(article.id, article.title)">{{ hasPermission('articles.review.decide') ? '退回' : '🔒 退回' }}</button>
             <button v-if="article.status === 'approved'" class="publish-small" @click="requestPublish(article.id)">{{ hasPermission('articles.publish') ? '发布' : '🔒 发布' }}</button>
           </div>
         </div>
         <p v-if="!reviewArticles.length" class="empty-state">当前没有待处理文章。</p>
+        <div v-if="pageData.total > pageData.limit" class="pagination">
+          <button class="button secondary" type="button" :disabled="page <= 1" @click="page--">上一页</button>
+          <span>第 {{ pageData.page }} / {{ totalPages }} 页，共 {{ pageData.total }} 篇待处理</span>
+          <button class="button secondary" type="button" :disabled="page >= totalPages" @click="page++">下一页</button>
+        </div>
       </div>
     </section>
 
@@ -73,14 +78,14 @@
 <script setup lang="ts">
 definePageMeta({ middleware: ['auth'] });
 const { hasPermission } = useAuth();
-const { list, approve, reject, publish, history } = useArticlesApi();
+const { listPage, approve, reject, publish, history, createPreviewToken } = useArticlesApi();
 const { success, error } = useToast();
 const permissionNotice = usePermissionNotice();
 const config = useRuntimeConfig();
-const { data: articles, refresh } = await useAsyncData('review-articles', () => list(), { default: () => [] });
-const reviewArticles = computed(() =>
-  articles.value.filter((article) => ['review', 'approved'].includes(article.status)),
-);
+const page = ref(1);
+const { data: pageData, refresh } = await useAsyncData('review-articles', () => listPage({ reviewQueue:true,page:page.value,limit:20 }), { default: () => ({ items:[],total:0,page:1,limit:20 }), watch:[page] });
+const reviewArticles = computed(() => pageData.value.items);
+const totalPages = computed(() => Math.max(1, Math.ceil(pageData.value.total / pageData.value.limit)));
 const busy = ref(false);
 const rejectTarget = ref<{ id: string; title: string } | null>(null);
 const rejectComment = ref('');
@@ -95,8 +100,16 @@ const simplifiedAuditLogs = computed(() => {
   );
 });
 
-const openPreview = (id: string) => {
-  window.open(`${config.public.webBase}/preview/${id}?token=mock-preview-token`, '_blank');
+const openPreview = async (id: string) => {
+  const previewWindow = window.open('', '_blank');
+  try {
+    const { token } = await createPreviewToken(id);
+    const url = `${config.public.webBase}/preview/${id}?token=${encodeURIComponent(token)}`;
+    if (previewWindow) previewWindow.location.href = url;
+  } catch (exception) {
+    previewWindow?.close();
+    error(getApiErrorMessage(exception));
+  }
 };
 const openReject = (id: string, title: string) => {
   rejectTarget.value = { id, title };

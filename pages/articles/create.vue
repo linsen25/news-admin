@@ -9,7 +9,7 @@
 import type { ArticleInput } from '~/types/article';
 definePageMeta({ middleware: ['auth', 'edit-access'] });
 const saving = ref(false);
-const { create, submit } = useArticlesApi();
+const { create, submit, createPreviewToken } = useArticlesApi();
 const { success, error } = useToast();
 const config = useRuntimeConfig();
 const persist = async (input: ArticleInput) => {
@@ -25,6 +25,7 @@ const persist = async (input: ArticleInput) => {
 };
 const saveDraft = async (input: ArticleInput) => {
   const article = await persist({ ...input, status: 'draft' });
+  const { token } = await createPreviewToken(article.id);
   await refreshNuxtData(['articles', 'dashboard-articles']);
   success('草稿创建成功');
   await navigateTo(`/articles/edit/${article.id}`);
@@ -34,7 +35,7 @@ const preview = async (input: ArticleInput) => {
   const article = await persist({ ...input, status: 'draft' });
   await refreshNuxtData(['articles', 'dashboard-articles']);
   success('预览版本已保存');
-  const url = `${config.public.webBase}/preview/${article.id}?token=mock-preview-token`;
+  const url = `${config.public.webBase}/preview/${article.id}?token=${encodeURIComponent(token)}`;
   if (previewWindow) previewWindow.location.href = url;
   await navigateTo(`/articles/edit/${article.id}`);
 };

@@ -11,9 +11,9 @@
       @preview="preview"
       @submit-review="submitReview"
     />
-    <section v-if="article?.status === 'published'" class="panel published-edit-warning">
+    <section v-if="article && (article.status === 'published' || article.hasPublishedVersion)" class="panel published-edit-warning">
       <strong>正在修改已发布文章</strong>
-      <p>保存或预览修改后，文章将转为草稿并暂时从前台撤下；修改完成后需要重新提交审核和发布。</p>
+      <p>保存或预览后会建立新的草稿版本，前台继续展示当前已发布版本；新版本需要重新审核和发布后才会替换线上内容。</p>
     </section>
     <section v-else-if="article" class="panel">
       当前状态为“{{ article.status }}”，审核中或已通过的文章需要先完成当前审核流程。
@@ -34,7 +34,7 @@
 import type { ArticleInput } from '~/types/article';
 definePageMeta({ middleware: ['auth', 'edit-access'] });
 const route = useRoute();
-const { get, update, submit, history } = useArticlesApi();
+const { get, update, submit, history, createPreviewToken } = useArticlesApi();
 const { success, error } = useToast();
 const id = String(route.params.id);
 const { data: article } = await useAsyncData(`article-${id}`, () => get(id));
@@ -65,7 +65,10 @@ const canEdit = computed(() => article.value ? ['draft', 'rejected', 'published'
 const persist = async (input: ArticleInput) => {
   saving.value = true;
   try {
-    article.value = await update(id, input);
+    article.value = await update(id, {
+      ...input,
+      expectedUpdatedAt: article.value?.updatedAt,
+    });
     await refreshHistory();
     return article.value;
   } catch (exception) {
@@ -83,9 +86,10 @@ const saveDraft = async (input: ArticleInput) => {
 const preview = async (input: ArticleInput) => {
   const previewWindow = window.open('', '_blank');
   const saved = await persist(input);
+  const { token } = await createPreviewToken(saved.id);
   await refreshNuxtData(['articles', 'dashboard-articles']);
   success('预览版本已保存');
-  const url = `${config.public.webBase}/preview/${saved.id}?token=mock-preview-token`;
+  const url = `${config.public.webBase}/preview/${saved.id}?token=${encodeURIComponent(token)}`;
   if (previewWindow) previewWindow.location.href = url;
 };
 const submitReview = async (input: ArticleInput) => {

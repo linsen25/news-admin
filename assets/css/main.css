@@ -70,10 +70,12 @@ h2 { font-size:18px; }
 .article-register-filters { display:grid; grid-template-columns:minmax(260px,1fr) 180px 180px; gap:12px; margin-bottom:20px; }
 .article-register-head,.article-register-row { display:grid; grid-template-columns:minmax(300px,2fr) 130px 150px 190px 72px; gap:18px; align-items:center; padding:14px 8px; border-bottom:1px solid #edf0ed; }
 .article-register-head { color:var(--muted); font-size:12px; font-weight:700; }
+.pagination { display:flex; align-items:center; justify-content:center; gap:14px; padding-top:20px; color:var(--muted); font-size:12px; }
 .register-title>strong { font-size:15px; }
 .register-title>p { display:-webkit-box; overflow:hidden; margin:5px 0 7px; color:var(--muted); font-size:12px; -webkit-box-orient:vertical; -webkit-line-clamp:1; }
 .register-title>div { display:flex; flex-wrap:wrap; gap:6px; color:var(--green); font-size:10px; }
 .register-taxonomy,.register-people,.register-times { display:flex; align-items:flex-start; flex-direction:column; gap:8px; font-size:12px; }
+.live-version-note { color:#8a6717; font-weight:600; }
 .register-people span,.register-times span { display:grid; grid-template-columns:58px 1fr; width:100%; }
 .register-people small,.register-times small { color:var(--muted); }
 .register-action { color:var(--green); font-size:12px; font-weight:700; }

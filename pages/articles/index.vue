@@ -18,14 +18,19 @@
       <p v-if="pending" class="empty-state">正在加载文章台账…</p>
       <div v-else class="article-register">
         <div class="article-register-head"><span>文章</span><span>分类 / 状态</span><span>人员</span><span>时间</span><span>操作</span></div>
-        <article v-for="article in filtered" :key="article.id" class="article-register-row">
+        <article v-for="article in pageData.items" :key="article.id" class="article-register-row">
           <div class="register-title"><strong>{{ article.title }}</strong><p>{{ article.summary || '暂无摘要' }}</p><div><span v-for="tag in article.tags" :key="tag.id"># {{ tag.name }}</span></div></div>
-          <div class="register-taxonomy"><strong>{{ article.category.name }}</strong><StatusBadge :status="article.status" /></div>
+          <div class="register-taxonomy"><strong>{{ article.category.name }}</strong><StatusBadge :status="article.status" /><small v-if="article.hasPublishedVersion" class="live-version-note">线上旧版仍在展示</small></div>
           <div class="register-people"><span><small>文章署名</small>{{ article.byline }}</span><span><small>录入负责人</small>{{ article.author.name }}</span><span><small>最近编辑</small>{{ article.currentEditor.name }}</span></div>
           <div class="register-times"><span><small>创建</small>{{ formatTime(article.createdAt) }}</span><span><small>修改</small>{{ formatTime(article.updatedAt) }}</span></div>
           <NuxtLink class="register-action" :to="`/articles/edit/${article.id}`">{{ ['draft','rejected','published'].includes(article.status) ? '编辑' : '查看' }} →</NuxtLink>
         </article>
-        <p v-if="!filtered.length" class="empty-state">{{ pageData.total ? '当前筛选条件下没有文章。' : emptyMessage }}</p>
+        <p v-if="!pageData.items.length" class="empty-state">{{ pageData.total ? '当前筛选条件下没有文章。' : emptyMessage }}</p>
+        <div v-if="pageData.total > pageData.limit" class="pagination">
+          <button class="button secondary" type="button" :disabled="page <= 1" @click="page--">上一页</button>
+          <span>第 {{ pageData.page }} / {{ totalPages }} 页，共 {{ pageData.total }} 篇</span>
+          <button class="button secondary" type="button" :disabled="page >= totalPages" @click="page++">下一页</button>
+        </div>
       </div>
     </section>
   </div>
@@ -34,17 +39,20 @@
 <script setup lang="ts">
 definePageMeta({ middleware:['auth','edit-access'] });
 const route=useRoute(); const router=useRouter(); const { user, hasPermission }=useAuth();
-const query=ref(''); const categoryId=ref(''); const status=ref(String(route.query.status||''));
+const query=ref(''); const search=ref(''); const categoryId=ref(''); const status=ref(String(route.query.status||'')); const page=ref(1);
 const statusOptions=[{value:'draft',label:'草稿'},{value:'review',label:'审核中'},{value:'approved',label:'已通过'},{value:'rejected',label:'已退回'},{value:'published',label:'已发布'}];
 const catalog=useCatalogApi(); const { listPage }=useArticlesApi();
 const [{ data:pageData, pending, error:loadError, refresh }, { data:categories }] = await Promise.all([
-  useAsyncData(`article-register-${user.value?.id || 'anonymous'}`, () => listPage(undefined,1,100), { default:() => ({ items:[], total:0, page:1, limit:100 }) }),
+  useAsyncData(`article-register-${user.value?.id || 'anonymous'}`, () => listPage({ page:page.value, limit:20, status:status.value||undefined, categoryId:categoryId.value||undefined, search:search.value||undefined }), { default:() => ({ items:[], total:0, page:1, limit:20 }), watch:[page,status,categoryId,search] }),
   useAsyncData('article-register-categories', catalog.categories, { default:() => [] }),
 ]);
 const categoryOptions=computed(() => categories.value.map((category) => ({ value:category.id,label:category.name })));
 watch(() => route.query.status,(value) => { status.value=String(value||''); });
 watch(status,(value) => router.replace({ query:{ ...route.query,status:value||undefined } }));
-const filtered=computed(() => { const keyword=query.value.trim().toLocaleLowerCase(); return pageData.value.items.filter((article) => (!status.value||article.status===status.value)&&(!categoryId.value||article.category.id===categoryId.value)&&(!keyword||[article.title,article.summary,article.byline,article.author.name,article.currentEditor.name,article.category.name,...article.tags.map((tag)=>tag.name)].join(' ').toLocaleLowerCase().includes(keyword))); });
+let searchTimer: ReturnType<typeof setTimeout> | undefined;
+watch(query,(value) => { clearTimeout(searchTimer); searchTimer=setTimeout(() => { search.value=value.trim(); page.value=1; },300); });
+watch([status,categoryId],() => { page.value=1; });
+const totalPages=computed(() => Math.max(1,Math.ceil(pageData.value.total/pageData.value.limit)));
 const emptyMessage=computed(() => hasPermission('users.permissions.manage') ? '当前数据库中还没有文章。' : '当前账号权限范围内还没有可见文章。');
 const formatTime=(value:string) => new Date(value).toLocaleString('zh-CN',{ year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit' });
 </script>

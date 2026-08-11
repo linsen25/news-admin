@@ -198,6 +198,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/articles/{id}/preview-token": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a short-lived preview token for one article */
+        post: operations["ArticlesController_createPreviewToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/articles/{id}": {
         parameters: {
             query?: never;
@@ -636,6 +653,8 @@ export interface components {
             updatedAt: string;
             /** Format: date-time */
             publishedAt: string | null;
+            /** @description 编辑中的文章是否仍有一个旧版本在线展示 */
+            hasPublishedVersion: boolean;
         };
         ArticlePageDto: {
             items: components["schemas"]["ArticleDto"][];
@@ -755,6 +774,11 @@ export interface components {
             tagIds?: string[];
             /** @enum {string} */
             status?: "draft" | "review" | "approved" | "rejected" | "published";
+            /**
+             * Format: date-time
+             * @description 客户端最后读取到的 updatedAt，用于防止覆盖他人的新修改
+             */
+            expectedUpdatedAt?: string;
         };
         RejectArticleDto: {
             /** @example 图片版权不明确，请补充来源。 */
@@ -995,6 +1019,10 @@ export interface operations {
                 limit?: components["schemas"]["Object"];
                 status?: string;
                 categoryId?: string;
+                /** @description Search title, summary, byline, category, tag, or editor */
+                search?: string;
+                /** @description Only return review and approved workflow items */
+                reviewQueue?: boolean;
             };
             header?: never;
             path?: never;
@@ -1116,6 +1144,25 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ArticleDto"];
                 };
+            };
+        };
+    };
+    ArticlesController_createPreviewToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
