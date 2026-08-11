@@ -85,6 +85,13 @@ h2 { font-size:18px; }
 .empty-state { padding:25px; color:var(--muted); text-align:center; }
 .users-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
 .user-card { display:grid; grid-template-columns:auto 1fr; gap:15px; }
+.user-card .role-selector,.user-card .permission-list,.user-card>.button { grid-column:1/-1; }
+.role-selector { display:flex; flex-wrap:wrap; gap:10px; margin:8px 0 0; padding:14px; border:1px solid var(--line); border-radius:10px; }
+.role-selector legend { padding:0 6px; color:var(--muted); font-size:12px; }
+.role-selector label { display:flex; align-items:center; gap:6px; padding:7px 10px; background:#f4f5f3; border-radius:7px; }
+.nav-lock { float:right; opacity:.65; font-size:12px; }
+.readonly-label { color:var(--muted); font-size:13px; }
+.button.disabled { opacity:.55; cursor:not-allowed; }
 .user-card h2 { margin:0 0 4px; }.user-card p { color:var(--muted); font-size:13px; }
 .avatar { width:46px; height:46px; border-radius:50%; display:grid; place-items:center; color:white; background:var(--green); font-weight:700; }
 .role-chip,.mock-label { color:#416357; background:#e6eee9; border-radius:99px; padding:5px 9px; font-size:12px; }
@@ -168,3 +175,11 @@ h2 { font-size:18px; }
   gap: 0.5rem;
   margin-top: 0.5rem;
 }
+
+.tag-manager { display:grid; gap:28px; }
+.tag-form { display:grid; grid-template-columns:1fr 1fr auto; gap:14px; align-items:end; }
+.tag-form-actions { display:flex; gap:8px; }
+.tag-table-head,.tag-table-row { display:grid; grid-template-columns:1fr 1.4fr 150px; gap:18px; align-items:center; padding:13px 8px; border-bottom:1px solid var(--line); }
+.tag-table-head { color:var(--muted); font-size:12px; font-weight:700; }
+.tag-table code { color:#4a6258; }
+@media (max-width:800px) { .tag-form,.tag-table-head,.tag-table-row{grid-template-columns:1fr}.tag-table-head{display:none} }

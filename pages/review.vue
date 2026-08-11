@@ -16,9 +16,9 @@
           <div class="row-actions">
             <button @click="openPreview(article.id)">预览</button>
             <button @click="showHistory(article.id, article.title)">历史</button>
-            <button v-if="article.status === 'review' && hasPermission('articles.review.decide')" class="approve" @click="decide(article.id, 'approve')">通过</button>
-            <button v-if="article.status === 'review' && hasPermission('articles.review.decide')" class="reject" @click="openReject(article.id, article.title)">退回</button>
-            <button v-if="article.status === 'approved' && hasPermission('articles.publish')" class="publish-small" @click="decide(article.id, 'publish')">发布</button>
+            <button v-if="article.status === 'review'" class="approve" :disabled="!hasPermission('articles.review.decide')" title="需要审核权限" @click="decide(article.id, 'approve')">{{ hasPermission('articles.review.decide') ? '通过' : '🔒 通过' }}</button>
+            <button v-if="article.status === 'review'" class="reject" :disabled="!hasPermission('articles.review.decide')" title="需要审核权限" @click="openReject(article.id, article.title)">{{ hasPermission('articles.review.decide') ? '退回' : '🔒 退回' }}</button>
+            <button v-if="article.status === 'approved'" class="publish-small" :disabled="!hasPermission('articles.publish')" title="需要发布权限" @click="decide(article.id, 'publish')">{{ hasPermission('articles.publish') ? '发布' : '🔒 发布' }}</button>
           </div>
         </div>
         <p v-if="!reviewArticles.length" class="empty-state">当前没有待处理文章。</p>
@@ -69,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ middleware: ['auth', 'review-access'] });
+definePageMeta({ middleware: ['auth'] });
 const { hasPermission } = useAuth();
 const { list, approve, reject, publish, history } = useArticlesApi();
 const { success, error } = useToast();

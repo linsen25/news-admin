@@ -7,8 +7,10 @@ const toAuthUser = (user: LoginResponse['user']): AuthUser => ({
   id: user.id,
   name: user.username,
   email: user.email,
-  roleId: user.role.id as AuthUser['roleId'],
-  roleName: user.role.name as AuthUser['roleName'],
+  roles: user.roles.map((role) => ({
+    id: role.id,
+    name: role.name as AuthUser['roles'][number]['name'],
+  })),
   permissions: user.permissions.map(
     (permission) => permission.key as PermissionKey,
   ),

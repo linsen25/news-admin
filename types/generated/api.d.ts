@@ -101,6 +101,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/users/{id}/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["UsersController_updateRoles"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/articles": {
         parameters: {
             query?: never;
@@ -307,8 +323,24 @@ export interface paths {
         };
         get: operations["TagsController_findAll"];
         put?: never;
-        post?: never;
+        post: operations["TagsController_create"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tags/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["TagsController_update"];
+        post?: never;
+        delete: operations["TagsController_delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -416,7 +448,7 @@ export interface components {
             username: string;
             /** @example author@example.com */
             email: string;
-            role: components["schemas"]["RoleDto"];
+            roles: components["schemas"]["RoleDto"][];
             permissions: components["schemas"]["PermissionDto"][];
         };
         LoginResponseDto: {
@@ -447,6 +479,15 @@ export interface components {
             description: string;
             /** Format: date-time */
             createdAt: string;
+        };
+        UpdateUserRolesDto: {
+            /**
+             * @example [
+             *       "role-author",
+             *       "role-reviewer"
+             *     ]
+             */
+            roleIds: string[];
         };
         Object: Record<string, never>;
         TipTapMarkDto: {
@@ -631,6 +672,18 @@ export interface components {
             /** @example 图片版权不明确，请补充来源。 */
             comment: string;
         };
+        CreateTagDto: {
+            /** @example 加拿大经济 */
+            name: string;
+            /** @example canada-economy */
+            slug: string;
+        };
+        UpdateTagDto: {
+            /** @example 加拿大经济 */
+            name?: string;
+            /** @example canada-economy */
+            slug?: string;
+        };
         MediaAssetDto: {
             /** @example media-001 */
             id: string;
@@ -773,6 +826,31 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PermissionDto"][];
+                };
+            };
+        };
+    };
+    UsersController_updateRoles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateUserRolesDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserDto"];
                 };
             };
         };
@@ -1109,6 +1187,75 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TagDto"][];
+                };
+            };
+        };
+    };
+    TagsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTagDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TagDto"];
+                };
+            };
+        };
+    };
+    TagsController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTagDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TagDto"];
+                };
+            };
+        };
+    };
+    TagsController_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };

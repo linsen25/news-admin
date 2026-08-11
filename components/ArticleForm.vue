@@ -18,17 +18,17 @@
     <aside class="panel form-side">
       <label>分类
         <select v-model="form.categoryId">
-          <option value="cat-ai">新闻 / 科技 / AI</option>
-          <option value="cat-software">新闻 / 科技 / 软件</option>
-          <option value="cat-ca">新闻 / 国际 / 加拿大</option>
+          <option v-for="category in categories" :key="category.id" :value="category.id">
+            {{ category.name }}
+          </option>
         </select>
       </label>
       <fieldset>
         <legend>标签</legend>
-        <label class="check"><input v-model="form.tagIds" type="checkbox" value="tag-openai" />OpenAI</label>
-        <label class="check"><input v-model="form.tagIds" type="checkbox" value="tag-chatgpt" />ChatGPT</label>
-        <label class="check"><input v-model="form.tagIds" type="checkbox" value="tag-canada" />加拿大</label>
-        <label class="check"><input v-model="form.tagIds" type="checkbox" value="tag-policy" />政策</label>
+        <label v-for="tag in tags" :key="tag.id" class="check">
+          <input v-model="form.tagIds" type="checkbox" :value="tag.id" />{{ tag.name }}
+        </label>
+        <small v-if="!tags.length">暂无标签，请由管理员在标签管理中创建。</small>
       </fieldset>
       <label>封面图片 URL<input v-model="form.coverImage" placeholder="暂用图片 URL，上传接口后续接入" /></label>
       <div class="cover-placeholder">
@@ -58,6 +58,9 @@ const emit = defineEmits<{
   submitReview: [value: ArticleInput];
 }>();
 const { user, hasPermission } = useAuth();
+const catalogApi = useCatalogApi();
+const { data: categories } = await useAsyncData('admin-categories', catalogApi.categories, { default: () => [] });
+const { data: tags } = await useAsyncData('admin-tags', catalogApi.tags, { default: () => [] });
 const actorId = user.value?.id ?? 'user-author';
 const form = reactive<ArticleInput>({
   title: props.initial?.title ?? '',

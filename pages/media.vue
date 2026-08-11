@@ -5,9 +5,9 @@
         <p class="eyebrow">MEDIA LIBRARY</p>
         <h1>媒体库</h1>
       </div>
-      <label class="button primary media-upload">
+      <label class="button primary media-upload" :class="{ disabled: !canUpload }" :title="canUpload ? '' : '你没有上传媒体的权限'">
         {{ uploading ? '上传中…' : '上传图片' }}
-        <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" :disabled="uploading" @change="upload" />
+        <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" :disabled="uploading || !canUpload" @change="upload" />
       </label>
     </div>
 
@@ -26,7 +26,7 @@
             <button
               class="button danger"
               type="button"
-              :disabled="asset.referenceCount > 0 || deleting === asset.id"
+              :disabled="!canDelete || asset.referenceCount > 0 || deleting === asset.id"
               :title="asset.referenceCount > 0 ? '图片仍被文章引用，不能删除' : ''"
               @click="removeAsset(asset.id, asset.filename)"
             >
@@ -40,9 +40,12 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ middleware: ['auth', 'edit-access'] });
+definePageMeta({ middleware: ['auth'] });
 
 const mediaApi = useMediaApi();
+const { hasPermission } = useAuth();
+const canUpload = computed(() => hasPermission('media.upload'));
+const canDelete = computed(() => hasPermission('media.delete'));
 const toast = useToast();
 const uploading = ref(false);
 const deleting = ref('');
