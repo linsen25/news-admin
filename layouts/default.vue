@@ -4,9 +4,13 @@
       <NuxtLink class="brand" to="/dashboard">Newsroom<span>CMS</span></NuxtLink>
       <nav>
         <NuxtLink to="/dashboard">概览</NuxtLink>
-        <NuxtLink to="/articles" active-class="" exact-active-class="" :class="{ 'sidebar-active': articlesActive }">编辑修改 <span v-if="!hasPermission('articles.create')" class="nav-lock">🔒</span></NuxtLink>
+        <NuxtLink v-slot="{ href, navigate }" to="/articles" custom>
+          <a :href="href" :class="{ 'sidebar-active': articlesActive }" @click="navigate">编辑修改 <span v-if="!hasPermission('articles.create')" class="nav-lock">🔒</span></a>
+        </NuxtLink>
         <NuxtLink v-if="hasPermission('articles.create')" to="/articles/create">创建文章</NuxtLink>
-        <NuxtLink v-if="hasPermission('articles.view.own')" to="/articles?status=draft" active-class="" exact-active-class="" :class="{ 'sidebar-active': draftsActive }">草稿箱</NuxtLink>
+        <NuxtLink v-if="hasPermission('articles.view.own')" v-slot="{ href, navigate }" to="/articles?status=draft" custom>
+          <a :href="href" :class="{ 'sidebar-active': draftsActive }" @click="navigate">草稿箱</a>
+        </NuxtLink>
         <NuxtLink to="/review">审阅文章 <span v-if="!hasPermission('articles.review.decide')" class="nav-lock">🔒</span></NuxtLink>
         <NuxtLink to="/media">媒体库 <span v-if="!hasPermission('media.upload')" class="nav-lock">🔒</span></NuxtLink>
         <NuxtLink to="/users">账号管理 <span v-if="!hasPermission('users.permissions.manage')" class="nav-lock">🔒</span></NuxtLink>
