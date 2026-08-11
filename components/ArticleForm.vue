@@ -53,6 +53,7 @@
         <button class="button secondary" type="button" :disabled="coverUploading" @click="coverInput?.click()">
           {{ coverUploading ? '处理并上传中…' : form.coverImage ? '更换封面' : '选择并上传封面' }}
         </button>
+        <button class="button secondary" type="button" :disabled="coverUploading" @click="openCoverLibrary">从媒体库选择</button>
         <input ref="coverInput" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp" @change="uploadCover">
       </div>
       <div class="cover-placeholder">
@@ -65,12 +66,25 @@
       <button v-if="hasPermission('articles.submit')" class="button publish" type="button" :disabled="saving || coverUploading" @click="emitAction('submit')">提交审核</button>
       <NuxtLink class="button text" to="/articles?status=draft">打开草稿箱</NuxtLink>
     </aside>
+
+    <div v-if="coverLibraryOpen" class="modal-backdrop editor-modal-layer" @click.self="coverLibraryOpen=false">
+      <section class="modal-card media-picker-dialog">
+        <div class="section-title"><div><p class="eyebrow">MEDIA LIBRARY</p><h2>选择文章封面</h2></div><button class="modal-close" type="button" @click="coverLibraryOpen=false">×</button></div>
+        <p class="muted">选择已有图片作为封面；前台会以 16:9 居中裁切展示，原图不会被修改。</p>
+        <p v-if="coverLibraryPending" class="muted">正在加载媒体库…</p>
+        <div v-else-if="coverAssets.length" class="media-picker-grid cover-library-grid">
+          <button v-for="asset in coverAssets" :key="asset.id" type="button" :class="{ selected:form.coverImage===asset.url }" @click="selectCover(asset)"><img :src="asset.url" :alt="asset.filename"><span>{{ asset.filename }}</span></button>
+        </div>
+        <p v-else class="muted">媒体库暂无图片，请先上传封面。</p>
+      </section>
+    </div>
   </form>
 </template>
 
 <script setup lang="ts">
 import type { ArticleInput } from '~/types/article';
 import { emptyDocument } from '~/types/article';
+import type { MediaAssetDTO } from '~/composables/useMediaApi';
 
 const props = withDefaults(defineProps<{ initial?: Partial<ArticleInput>; saving?: boolean }>(), { saving: false });
 const emit = defineEmits<{ save: [value: ArticleInput]; preview: [value: ArticleInput]; submitReview: [value: ArticleInput] }>();
@@ -80,6 +94,9 @@ const mediaApi = useMediaApi();
 const toast = useToast();
 const coverInput = ref<HTMLInputElement | null>(null);
 const coverUploading = ref(false);
+const coverLibraryOpen = ref(false);
+const coverLibraryPending = ref(false);
+const coverAssets = ref<MediaAssetDTO[]>([]);
 const { data: categories } = await useAsyncData('admin-categories', catalogApi.categories, { default: () => [] });
 const { data: tags, refresh: refreshTags } = await useAsyncData('admin-tags', catalogApi.tags, { default: () => [] });
 const customTagName = ref('');
@@ -117,6 +134,14 @@ const uploadCover = async (event: Event) => {
   catch (exception) { toast.error(getApiErrorMessage(exception)); }
   finally { coverUploading.value = false; input.value = ''; }
 };
+const openCoverLibrary = async () => {
+  coverLibraryOpen.value = true;
+  coverLibraryPending.value = true;
+  try { coverAssets.value = await mediaApi.list(); }
+  catch (exception) { toast.error(getApiErrorMessage(exception)); }
+  finally { coverLibraryPending.value = false; }
+};
+const selectCover = (asset: MediaAssetDTO) => { form.coverImage = asset.url; coverLibraryOpen.value = false; toast.success('已从媒体库选择封面'); };
 const setKeywords = (event: Event) => { form.keywords = (event.target as HTMLInputElement).value.split(',').map((value) => value.trim()).filter(Boolean); };
 const addCustomTag = async () => {
   const name = customTagName.value.trim();

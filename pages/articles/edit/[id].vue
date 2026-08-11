@@ -2,6 +2,7 @@
   <div>
     <div class="page-heading">
       <div><p class="eyebrow">EDIT ARTICLE</p><h1>编辑文章</h1></div>
+      <button v-if="article && (article.status === 'published' || article.hasPublishedVersion)" class="button danger" type="button" @click="withdrawOpen=true">撤稿</button>
     </div>
     <ArticleForm
       v-if="article && canEdit"
@@ -15,9 +16,10 @@
       <strong>正在修改已发布文章</strong>
       <p>保存或预览后会建立新的草稿版本，前台继续展示当前已发布版本；新版本需要重新审核和发布后才会替换线上内容。</p>
     </section>
-    <section v-else-if="article" class="panel">
+    <section v-else-if="article && article.status !== 'withdrawn'" class="panel">
       当前状态为“{{ article.status }}”，审核中或已通过的文章需要先完成当前审核流程。
     </section>
+    <section v-else-if="article" class="panel published-edit-warning"><strong>文章已撤稿</strong><p>前台已停止展示。你可以继续编辑，保存后重新提交审核；只有再次发布成功后才会重新上线。</p></section>
     <section v-else class="panel">文章不存在。</section>
 
     <section v-if="reviewHistory?.reviewComments.length" class="panel author-history">
@@ -27,6 +29,10 @@
         <p>{{ comment.content }}</p>
       </article>
     </section>
+
+    <div v-if="withdrawOpen" class="modal-backdrop" @click.self="withdrawOpen=false">
+      <section class="modal-card"><p class="eyebrow">WITHDRAW ARTICLE</p><h2>确认撤下《{{ article?.title }}》？</h2><p class="muted">撤稿后文章会立即从前台消失，但稿件、历史和媒体引用都会保留。再次上线必须重新编辑、审核并发布。</p><div class="modal-actions"><button class="button secondary" type="button" @click="withdrawOpen=false">取消</button><button class="button danger" type="button" :disabled="withdrawing" @click="confirmWithdraw">{{ withdrawing ? '撤稿中…' : '确认撤稿' }}</button></div></section>
+    </div>
   </div>
 </template>
 
@@ -34,7 +40,7 @@
 import type { ArticleInput } from '~/types/article';
 definePageMeta({ middleware: ['auth', 'edit-access'] });
 const route = useRoute();
-const { get, update, submit, history, createPreviewToken } = useArticlesApi();
+const { get, update, submit, withdraw, history, createPreviewToken } = useArticlesApi();
 const { success, error } = useToast();
 const id = String(route.params.id);
 const { data: article } = await useAsyncData(`article-${id}`, () => get(id));
@@ -43,6 +49,8 @@ const { data: reviewHistory, refresh: refreshHistory } = await useAsyncData(
   () => history(id),
 );
 const saving = ref(false);
+const withdrawOpen = ref(false);
+const withdrawing = ref(false);
 const config = useRuntimeConfig();
 const initial = computed<Partial<ArticleInput> | undefined>(() => article.value ? ({
   title: article.value.title,
@@ -61,7 +69,14 @@ const initial = computed<Partial<ArticleInput> | undefined>(() => article.value 
   authorId: article.value.author.id,
   currentEditorId: useAuth().user.value?.id ?? 'user-author',
 }) : undefined);
-const canEdit = computed(() => article.value ? ['draft', 'rejected', 'published'].includes(article.value.status) : false);
+const canEdit = computed(() => article.value ? ['draft', 'rejected', 'published', 'withdrawn'].includes(article.value.status) : false);
+const confirmWithdraw = async () => {
+  if (!article.value) return;
+  withdrawing.value = true;
+  try { article.value = await withdraw(article.value.id); withdrawOpen.value = false; success('文章已撤稿，前台已停止展示'); await refreshHistory(); await refreshNuxtData(['articles','dashboard-articles']); }
+  catch (exception) { error(getApiErrorMessage(exception)); }
+  finally { withdrawing.value = false; }
+};
 const persist = async (input: ArticleInput) => {
   saving.value = true;
   try {

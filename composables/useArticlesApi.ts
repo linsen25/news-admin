@@ -32,7 +32,7 @@ export const useArticlesApi = () => {
     $fetch<ArticleDTO>(endpoint(`/${id}`), { method: 'PUT', body: input, ...options() });
   const action = (
     id: string,
-    name: 'submit' | 'approve' | 'reject' | 'publish',
+    name: 'submit' | 'approve' | 'reject' | 'publish' | 'withdraw',
     body?: Record<string, string>,
   ) => $fetch<ArticleDTO>(endpoint(`/${id}/${name}`), {
     method: 'POST',
@@ -57,6 +57,7 @@ export const useArticlesApi = () => {
     approve: (id: string) => action(id, 'approve'),
     reject: (id: string, comment: string) => action(id, 'reject', { comment }),
     publish: (id: string) => action(id, 'publish'),
+    withdraw: (id: string) => action(id, 'withdraw'),
     history,
     createPreviewToken,
   };

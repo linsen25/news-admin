@@ -12,5 +12,6 @@ const labels: Record<ArticleStatus, string> = {
   approved: '已通过',
   rejected: '已退回',
   published: '已发布',
+  withdrawn: '已撤稿',
 };
 </script>

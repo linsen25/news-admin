@@ -315,6 +315,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/articles/{id}/withdraw": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Withdraw a publicly visible article */
+        post: operations["ArticlesController_withdraw"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/categories": {
         parameters: {
             query?: never;
@@ -652,7 +669,7 @@ export interface components {
              * @example draft
              * @enum {string}
              */
-            status: "draft" | "review" | "approved" | "rejected" | "published";
+            status: "draft" | "review" | "approved" | "rejected" | "published" | "withdrawn";
             author: components["schemas"]["EntityReferenceDto"];
             currentEditor: components["schemas"]["EntityReferenceDto"];
             category: components["schemas"]["CategoryReferenceDto"];
@@ -735,7 +752,7 @@ export interface components {
              */
             tagIds: string[];
             /** @enum {string} */
-            status?: "draft" | "review" | "approved" | "rejected" | "published";
+            status?: "draft" | "review" | "approved" | "rejected" | "published" | "withdrawn";
         };
         UpdateArticleDto: {
             /** @example 加拿大 AI 政策更新 */
@@ -783,7 +800,7 @@ export interface components {
              */
             tagIds?: string[];
             /** @enum {string} */
-            status?: "draft" | "review" | "approved" | "rejected" | "published";
+            status?: "draft" | "review" | "approved" | "rejected" | "published" | "withdrawn";
             /**
              * Format: date-time
              * @description 客户端最后读取到的 updatedAt，用于防止覆盖他人的新修改
@@ -1338,6 +1355,27 @@ export interface operations {
         };
     };
     ArticlesController_publish: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArticleDto"];
+                };
+            };
+        };
+    };
+    ArticlesController_withdraw: {
         parameters: {
             query?: never;
             header?: never;

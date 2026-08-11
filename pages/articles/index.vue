@@ -23,7 +23,7 @@
           <div class="register-taxonomy"><strong>{{ article.category.name }}</strong><StatusBadge :status="article.status" /><small v-if="article.hasPublishedVersion" class="live-version-note">线上旧版仍在展示</small></div>
           <div class="register-people"><span><small>文章署名</small>{{ article.byline }}</span><span><small>录入负责人</small>{{ article.author.name }}</span><span><small>最近编辑</small>{{ article.currentEditor.name }}</span></div>
           <div class="register-times"><span><small>创建</small>{{ formatTime(article.createdAt) }}</span><span><small>修改</small>{{ formatTime(article.updatedAt) }}</span></div>
-          <NuxtLink class="register-action" :to="`/articles/edit/${article.id}`">{{ ['draft','rejected','published'].includes(article.status) ? '编辑' : '查看' }} →</NuxtLink>
+          <NuxtLink class="register-action" :to="`/articles/edit/${article.id}`">{{ ['draft','rejected','published','withdrawn'].includes(article.status) ? '编辑' : '查看' }} →</NuxtLink>
         </article>
         <p v-if="!pageData.items.length" class="empty-state">{{ pageData.total ? '当前筛选条件下没有文章。' : emptyMessage }}</p>
         <div v-if="pageData.total > pageData.limit" class="pagination">
@@ -40,7 +40,7 @@
 definePageMeta({ middleware:['auth','edit-access'] });
 const route=useRoute(); const router=useRouter(); const { user, hasPermission }=useAuth();
 const query=ref(''); const search=ref(''); const categoryId=ref(''); const status=ref(String(route.query.status||'')); const page=ref(1);
-const statusOptions=[{value:'draft',label:'草稿'},{value:'review',label:'审核中'},{value:'approved',label:'已通过'},{value:'rejected',label:'已退回'},{value:'published',label:'已发布'}];
+const statusOptions=[{value:'draft',label:'草稿'},{value:'review',label:'审核中'},{value:'approved',label:'已通过'},{value:'rejected',label:'已退回'},{value:'published',label:'已发布'},{value:'withdrawn',label:'已撤稿'}];
 const catalog=useCatalogApi(); const { listPage }=useArticlesApi();
 const [{ data:pageData, pending, error:loadError, refresh }, { data:categories }] = await Promise.all([
   useAsyncData(`article-register-${user.value?.id || 'anonymous'}`, () => listPage({ page:page.value, limit:20, status:status.value||undefined, categoryId:categoryId.value||undefined, search:search.value||undefined }), { default:() => ({ items:[], total:0, page:1, limit:20 }), watch:[page,status,categoryId,search] }),
