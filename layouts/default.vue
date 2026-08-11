@@ -6,6 +6,7 @@
         <NuxtLink to="/dashboard">概览</NuxtLink>
         <NuxtLink to="/articles">编辑修改 <span v-if="!hasPermission('articles.create')" class="nav-lock">🔒</span></NuxtLink>
         <NuxtLink v-if="hasPermission('articles.create')" to="/articles/create">创建文章</NuxtLink>
+        <NuxtLink v-if="hasPermission('articles.view.own')" to="/articles?status=draft">草稿箱</NuxtLink>
         <NuxtLink to="/review">审阅文章 <span v-if="!hasPermission('articles.review.decide')" class="nav-lock">🔒</span></NuxtLink>
         <NuxtLink to="/media">媒体库 <span v-if="!hasPermission('media.upload')" class="nav-lock">🔒</span></NuxtLink>
         <NuxtLink to="/users">账号管理 <span v-if="!hasPermission('users.permissions.manage')" class="nav-lock">🔒</span></NuxtLink>

@@ -71,11 +71,13 @@ const persist = async (input: ArticleInput) => {
 };
 const saveDraft = async (input: ArticleInput) => {
   await persist({ ...input, status: 'draft' });
+  await refreshNuxtData(['articles', 'dashboard-articles']);
   success('草稿保存成功');
 };
 const preview = async (input: ArticleInput) => {
   const previewWindow = window.open('', '_blank');
   const saved = await persist(input);
+  await refreshNuxtData(['articles', 'dashboard-articles']);
   success('预览版本已保存');
   const url = `${config.public.webBase}/preview/${saved.id}?token=mock-preview-token`;
   if (previewWindow) previewWindow.location.href = url;
@@ -84,6 +86,7 @@ const submitReview = async (input: ArticleInput) => {
   try {
     const saved = await persist({ ...input, status: 'draft' });
     article.value = await submit(saved.id);
+    await refreshNuxtData(['articles', 'dashboard-articles']);
     success('文章已提交审核');
   } catch {}
 };

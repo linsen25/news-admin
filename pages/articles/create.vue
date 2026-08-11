@@ -25,12 +25,14 @@ const persist = async (input: ArticleInput) => {
 };
 const saveDraft = async (input: ArticleInput) => {
   const article = await persist({ ...input, status: 'draft' });
+  await refreshNuxtData(['articles', 'dashboard-articles']);
   success('草稿创建成功');
   await navigateTo(`/articles/edit/${article.id}`);
 };
 const preview = async (input: ArticleInput) => {
   const previewWindow = window.open('', '_blank');
   const article = await persist({ ...input, status: 'draft' });
+  await refreshNuxtData(['articles', 'dashboard-articles']);
   success('预览版本已保存');
   const url = `${config.public.webBase}/preview/${article.id}?token=mock-preview-token`;
   if (previewWindow) previewWindow.location.href = url;
@@ -39,6 +41,7 @@ const preview = async (input: ArticleInput) => {
 const submitReview = async (input: ArticleInput) => {
   const article = await persist({ ...input, status: 'draft' });
   await submit(article.id);
+  await refreshNuxtData(['articles', 'dashboard-articles']);
   success('文章已提交审核');
   await navigateTo(`/articles/edit/${article.id}`);
 };
