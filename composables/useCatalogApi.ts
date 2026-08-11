@@ -13,6 +13,18 @@ export const useCatalogApi = () => {
     $fetch<CatalogItem[]>(`${config.public.apiBase}/categories`);
   const tags = () =>
     $fetch<CatalogItem[]>(`${config.public.apiBase}/tags`);
+  const createCategory = (input: Pick<CatalogItem, 'name' | 'slug' | 'parentId'>) =>
+    $fetch<CatalogItem>(`${config.public.apiBase}/categories`, {
+      method: 'POST', body: input, headers: authHeaders(),
+    });
+  const updateCategory = (id: string, input: Partial<Pick<CatalogItem, 'name' | 'slug' | 'parentId'>>) =>
+    $fetch<CatalogItem>(`${config.public.apiBase}/categories/${id}`, {
+      method: 'PUT', body: input, headers: authHeaders(),
+    });
+  const deleteCategory = (id: string) =>
+    $fetch<void>(`${config.public.apiBase}/categories/${id}`, {
+      method: 'DELETE', headers: authHeaders(),
+    });
   const createTag = (input: Pick<CatalogItem, 'name' | 'slug'>) =>
     $fetch<CatalogItem>(`${config.public.apiBase}/tags`, {
       method: 'POST',
@@ -33,5 +45,5 @@ export const useCatalogApi = () => {
       headers: authHeaders(),
     });
 
-  return { categories, tags, createTag, updateTag, deleteTag };
+  return { categories, tags, createCategory, updateCategory, deleteCategory, createTag, updateTag, deleteTag };
 };
