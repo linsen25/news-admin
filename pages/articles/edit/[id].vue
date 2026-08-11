@@ -44,6 +44,8 @@ const initial = computed<Partial<ArticleInput> | undefined>(() => article.value 
   title: article.value.title,
   slug: article.value.slug,
   summary: article.value.summary,
+  byline: article.value.byline,
+  articleDate: article.value.articleDate.slice(0, 10),
   metaTitle: article.value.metaTitle,
   metaDescription: article.value.metaDescription,
   keywords: article.value.keywords,

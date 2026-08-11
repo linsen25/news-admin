@@ -62,7 +62,7 @@ export interface paths {
         };
         get: operations["UsersController_findAll"];
         put?: never;
-        post?: never;
+        post: operations["UsersController_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -307,8 +307,24 @@ export interface paths {
         };
         get: operations["CategoriesController_findAll"];
         put?: never;
-        post?: never;
+        post: operations["CategoriesController_create"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/categories/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["CategoriesController_update"];
+        post?: never;
+        delete: operations["CategoriesController_delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -324,6 +340,22 @@ export interface paths {
         get: operations["TagsController_findAll"];
         put?: never;
         post: operations["TagsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tags/custom": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["TagsController_createCustom"];
         delete?: never;
         options?: never;
         head?: never;
@@ -480,6 +512,20 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
+        CreateUserDto: {
+            /** @example 王编辑 */
+            username: string;
+            /** @example editor@example.com */
+            email: string;
+            /** @example 123456 */
+            password: string;
+            /**
+             * @example [
+             *       "role-author"
+             *     ]
+             */
+            roleIds: string[];
+        };
         UpdateUserRolesDto: {
             /**
              * @example [
@@ -533,6 +579,8 @@ export interface components {
             name: string;
             /** @example ai */
             slug: string;
+            /** @example category-technology */
+            parentId?: Record<string, never> | null;
         };
         TagDto: {
             /** @example user-author */
@@ -541,6 +589,10 @@ export interface components {
             name: string;
             /** @example ai */
             slug: string;
+            /** @example category-technology */
+            parentId?: Record<string, never> | null;
+            /** @example cat-tech */
+            categoryId?: Record<string, never> | null;
         };
         ArticleDto: {
             /** @example article-001 */
@@ -565,6 +617,10 @@ export interface components {
             content: components["schemas"]["TipTapDocumentDto"];
             /** @example https://example.com/cover.jpg */
             coverImage: string;
+            /** @example 李明（本报特约记者） */
+            byline: string;
+            /** Format: date-time */
+            articleDate: string;
             /**
              * @example draft
              * @enum {string}
@@ -626,18 +682,29 @@ export interface components {
             content?: components["schemas"]["TipTapDocumentDto"];
             /** @example https://example.com/cover.jpg */
             coverImage?: string;
+            /**
+             * @description 面向读者展示的文章署名；与后台录入账号分开
+             * @example 李明（本报特约记者）
+             */
+            byline?: string;
+            /**
+             * Format: date-time
+             * @description 稿件日期；与系统创建时间和发布时间分开
+             * @example 2026-08-12T00:00:00.000Z
+             */
+            articleDate?: string;
             /** @example user-author */
             authorId: string;
             /** @example user-author */
             currentEditorId?: string;
-            /** @example cat-ai */
+            /** @example cat-tech */
             categoryId: string;
             /**
              * @example [
              *       "tag-openai"
              *     ]
              */
-            tagIds?: string[];
+            tagIds: string[];
             /** @enum {string} */
             status?: "draft" | "review" | "approved" | "rejected" | "published";
         };
@@ -663,11 +730,22 @@ export interface components {
             content?: components["schemas"]["TipTapDocumentDto"];
             /** @example https://example.com/cover.jpg */
             coverImage?: string;
+            /**
+             * @description 面向读者展示的文章署名；与后台录入账号分开
+             * @example 李明（本报特约记者）
+             */
+            byline?: string;
+            /**
+             * Format: date-time
+             * @description 稿件日期；与系统创建时间和发布时间分开
+             * @example 2026-08-12T00:00:00.000Z
+             */
+            articleDate?: string;
             /** @example user-author */
             authorId?: string;
             /** @example user-author */
             currentEditorId?: string;
-            /** @example cat-ai */
+            /** @example cat-tech */
             categoryId?: string;
             /**
              * @example [
@@ -682,17 +760,39 @@ export interface components {
             /** @example 图片版权不明确，请补充来源。 */
             comment: string;
         };
+        CreateCategoryDto: {
+            /** @example 加拿大 */
+            name: string;
+            /** @example canada */
+            slug: string;
+        };
+        UpdateCategoryDto: {
+            /** @example 加拿大 */
+            name?: string;
+            /** @example canada */
+            slug?: string;
+        };
+        CreateCustomTagDto: {
+            /** @example 量子计算 */
+            name: string;
+            /** @example cat-tech */
+            categoryId: string;
+        };
         CreateTagDto: {
             /** @example 加拿大经济 */
             name: string;
             /** @example canada-economy */
             slug: string;
+            /** @example cat-tech */
+            categoryId: string;
         };
         UpdateTagDto: {
             /** @example 加拿大经济 */
             name?: string;
             /** @example canada-economy */
             slug?: string;
+            /** @example cat-tech */
+            categoryId?: string;
         };
         MediaAssetDto: {
             /** @example media-001 */
@@ -798,6 +898,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserDto"][];
+                };
+            };
+        };
+    };
+    UsersController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateUserDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserDto"];
                 };
             };
         };
@@ -1183,6 +1306,75 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
+                content: {
+                    "application/json": components["schemas"]["CategoryReferenceDto"][];
+                };
+            };
+        };
+    };
+    CategoriesController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCategoryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryReferenceDto"];
+                };
+            };
+        };
+    };
+    CategoriesController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCategoryDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryReferenceDto"];
+                };
+            };
+        };
+    };
+    CategoriesController_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
                 content?: never;
             };
         };
@@ -1216,6 +1408,29 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["CreateTagDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TagDto"];
+                };
+            };
+        };
+    };
+    TagsController_createCustom: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCustomTagDto"];
             };
         };
         responses: {

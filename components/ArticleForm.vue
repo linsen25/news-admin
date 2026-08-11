@@ -3,6 +3,10 @@
     <section class="panel form-main">
       <label>文章标题<input v-model="form.title" required placeholder="输入清晰、准确的新闻标题"></label>
       <label>摘要<textarea v-model="form.summary" rows="3" placeholder="用一至两句话概括文章重点，将显示在新闻列表中"></textarea></label>
+      <div class="article-credit-fields">
+        <label>文章作者（署名）<input v-model="form.byline" required placeholder="例如：李明、本报通讯员或中加网编辑部"><small>这是前台向读者展示的作者，不会使用你的后台账号名称。</small></label>
+        <label>稿件日期<input v-model="form.articleDate" required type="date"><small>显示在文章页面；系统创建时间和实际发布时间仍会分别记录。</small></label>
+      </div>
       <div class="form-field">
         <span class="field-label">正文内容</span>
         <RichTextEditor v-model="form.content" />
@@ -85,6 +89,7 @@ const categoryOptions = computed(() => [...categories.value].sort((a, b) => a.na
 const availableTags = computed(() => tags.value.filter((tag) => tag.categoryId === form.categoryId));
 const form = reactive<ArticleInput>({
   title: props.initial?.title ?? '', slug: props.initial?.slug ?? '', summary: props.initial?.summary ?? '',
+  byline: props.initial?.byline ?? '', articleDate: props.initial?.articleDate?.slice(0, 10) ?? new Date().toISOString().slice(0, 10),
   metaTitle: props.initial?.metaTitle ?? '', metaDescription: props.initial?.metaDescription ?? '', keywords: props.initial?.keywords ?? [],
   content: props.initial?.content ?? emptyDocument(), coverImage: props.initial?.coverImage ?? '',
   categoryId: props.initial?.categoryId ?? 'cat-ai', tagIds: props.initial?.tagIds ?? [], status: props.initial?.status ?? 'draft',
@@ -131,6 +136,8 @@ watchEffect(() => { if (!categories.value.some((item) => item.id === form.catego
 watch(() => form.categoryId, () => { form.tagIds = form.tagIds.filter((id) => availableTags.value.some((tag) => tag.id === id)); });
 const emitAction = (action: 'save' | 'preview' | 'submit') => {
   if (!form.title.trim()) return toast.error('请填写文章标题');
+  if (!form.byline.trim()) return toast.error('请填写文章作者（署名）');
+  if (!form.articleDate) return toast.error('请选择稿件日期');
   if (!form.categoryId) return toast.error('请选择一个文章分类');
   if (!form.tagIds.length) return toast.error('请至少选择一个文章标签');
   emit(action === 'submit' ? 'submitReview' : action, { ...form, content: structuredClone(toRaw(form.content)), keywords: [...form.keywords], tagIds: [...form.tagIds], status: 'draft' });

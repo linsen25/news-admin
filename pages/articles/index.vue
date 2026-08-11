@@ -21,7 +21,7 @@
         <article v-for="article in filtered" :key="article.id" class="article-register-row">
           <div class="register-title"><strong>{{ article.title }}</strong><p>{{ article.summary || '暂无摘要' }}</p><div><span v-for="tag in article.tags" :key="tag.id"># {{ tag.name }}</span></div></div>
           <div class="register-taxonomy"><strong>{{ article.category.name }}</strong><StatusBadge :status="article.status" /></div>
-          <div class="register-people"><span><small>作者</small>{{ article.author.name }}</span><span><small>最近编辑</small>{{ article.currentEditor.name }}</span></div>
+          <div class="register-people"><span><small>文章署名</small>{{ article.byline }}</span><span><small>录入负责人</small>{{ article.author.name }}</span><span><small>最近编辑</small>{{ article.currentEditor.name }}</span></div>
           <div class="register-times"><span><small>创建</small>{{ formatTime(article.createdAt) }}</span><span><small>修改</small>{{ formatTime(article.updatedAt) }}</span></div>
           <NuxtLink class="register-action" :to="`/articles/edit/${article.id}`">{{ ['draft','rejected'].includes(article.status) ? '编辑' : '查看' }} →</NuxtLink>
         </article>
@@ -44,7 +44,7 @@ const [{ data:pageData, pending, error:loadError, refresh }, { data:categories }
 const categoryOptions=computed(() => categories.value.map((category) => ({ value:category.id,label:category.name })));
 watch(() => route.query.status,(value) => { status.value=String(value||''); });
 watch(status,(value) => router.replace({ query:{ ...route.query,status:value||undefined } }));
-const filtered=computed(() => { const keyword=query.value.trim().toLocaleLowerCase(); return pageData.value.items.filter((article) => (!status.value||article.status===status.value)&&(!categoryId.value||article.category.id===categoryId.value)&&(!keyword||[article.title,article.summary,article.author.name,article.currentEditor.name,article.category.name,...article.tags.map((tag)=>tag.name)].join(' ').toLocaleLowerCase().includes(keyword))); });
+const filtered=computed(() => { const keyword=query.value.trim().toLocaleLowerCase(); return pageData.value.items.filter((article) => (!status.value||article.status===status.value)&&(!categoryId.value||article.category.id===categoryId.value)&&(!keyword||[article.title,article.summary,article.byline,article.author.name,article.currentEditor.name,article.category.name,...article.tags.map((tag)=>tag.name)].join(' ').toLocaleLowerCase().includes(keyword))); });
 const emptyMessage=computed(() => hasPermission('users.permissions.manage') ? '当前数据库中还没有文章。' : '当前账号权限范围内还没有可见文章。');
 const formatTime=(value:string) => new Date(value).toLocaleString('zh-CN',{ year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit' });
 </script>

@@ -8,6 +8,8 @@ export type CreateArticleDTO = components['schemas']['CreateArticleDto'];
 export type ArticleHistoryDTO = components['schemas']['ArticleHistoryDto'];
 
 export type ArticleInput = CreateArticleDTO & {
+  byline: string;
+  articleDate: string;
   summary: string;
   content: TipTapDocument;
   coverImage: string;

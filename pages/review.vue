@@ -9,7 +9,7 @@
         <div v-for="article in reviewArticles" :key="article.id" class="table-row">
           <div>
             <strong>{{ article.title }}</strong>
-            <small>{{ article.author.name }}</small>
+            <small>署名：{{ article.byline }} · 录入：{{ article.author.name }}</small>
           </div>
           <StatusBadge :status="article.status" />
           <span>{{ new Date(article.createdAt).toLocaleDateString('zh-CN') }}</span>
