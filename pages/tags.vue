@@ -7,14 +7,18 @@
     <section class="panel tag-manager">
       <form v-if="canManage" class="tag-form" @submit.prevent="save">
         <label>标签名称<input v-model="draft.name" required maxlength="50" placeholder="例如：加拿大经济"></label>
-        <label>Slug<input v-model="draft.slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="canada-economy"></label>
+        <label>
+          网址标识
+          <input v-model="draft.slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="例如：canada-policy">
+          <small class="field-help">用于生成筛选网址，请填写小写英文或拼音；多个单词用短横线连接。</small>
+        </label>
         <div class="tag-form-actions">
           <button class="button primary" type="submit" :disabled="saving">{{ saving ? '保存中…' : editingId ? '保存修改' : '新增标签' }}</button>
           <button v-if="editingId" class="button secondary" type="button" @click="reset">取消</button>
         </div>
       </form>
       <div class="tag-table">
-        <div class="tag-table-head"><span>名称</span><span>Slug</span><span>操作</span></div>
+        <div class="tag-table-head"><span>标签名称</span><span>网址标识</span><span>操作</span></div>
         <div v-for="tag in tags" :key="tag.id" class="tag-table-row">
           <strong>{{ tag.name }}</strong><code>{{ tag.slug }}</code>
           <div class="row-actions">
