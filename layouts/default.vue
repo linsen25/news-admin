@@ -12,6 +12,7 @@
           <a :href="href" :class="{ 'sidebar-active': draftsActive }" @click="navigate">草稿箱</a>
         </NuxtLink>
         <NuxtLink to="/review">审阅文章 <span v-if="!hasPermission('articles.review.decide')" class="nav-lock">🔒</span></NuxtLink>
+        <NuxtLink to="/homepage">首页编排 <span v-if="!hasPermission('homepage.manage')" class="nav-lock">🔒</span></NuxtLink>
         <NuxtLink to="/media">媒体库 <span v-if="!hasPermission('media.upload')" class="nav-lock">🔒</span></NuxtLink>
         <NuxtLink to="/users">账号管理 <span v-if="!hasPermission('users.permissions.manage')" class="nav-lock">🔒</span></NuxtLink>
         <NuxtLink to="/tags">分类与标签 <span v-if="!hasPermission('users.permissions.manage')" class="nav-lock">🔒</span></NuxtLink>

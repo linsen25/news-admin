@@ -510,6 +510,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/homepage/public": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["HomepageController_findPublic"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/homepage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["HomepageController_findAll"];
+        put: operations["HomepageController_replace"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -976,6 +1008,39 @@ export interface components {
             createdAt: string;
             /** @example 2 */
             referenceCount: number;
+        };
+        HomepageSlotDto: {
+            id: string;
+            /** @enum {string} */
+            section: "headline_main" | "headline_secondary" | "category_featured";
+            scope: string;
+            position: number;
+            article: components["schemas"]["ArticleDto"];
+            /** Format: date-time */
+            startsAt?: Record<string, never> | null;
+            /** Format: date-time */
+            endsAt?: Record<string, never> | null;
+        };
+        HomepageLayoutDto: {
+            slots: components["schemas"]["HomepageSlotDto"][];
+        };
+        HomepageSlotInputDto: {
+            /** @enum {string} */
+            section: "headline_main" | "headline_secondary" | "category_featured";
+            /**
+             * @description global，或分类 ID
+             * @example global
+             */
+            scope: string;
+            position: number;
+            articleId: string;
+            /** Format: date-time */
+            startsAt?: Record<string, never> | null;
+            /** Format: date-time */
+            endsAt?: Record<string, never> | null;
+        };
+        UpdateHomepageLayoutDto: {
+            slots: components["schemas"]["HomepageSlotInputDto"][];
         };
     };
     responses: never;
@@ -1830,6 +1895,67 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    HomepageController_findPublic: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HomepageLayoutDto"];
+                };
+            };
+        };
+    };
+    HomepageController_findAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HomepageLayoutDto"];
+                };
+            };
+        };
+    };
+    HomepageController_replace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateHomepageLayoutDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HomepageLayoutDto"];
+                };
             };
         };
     };

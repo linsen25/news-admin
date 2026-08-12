@@ -150,6 +150,28 @@ h2 { font-size:18px; }
 .homepage-editorial-controls label { display:grid; gap:6px; font-size:12px; }
 .homepage-editorial-controls input[type="number"] { width:100%; }
 .homepage-editorial-controls .editorial-toggle { display:flex; align-items:center; gap:8px; }
+.homepage-desk { display:grid; grid-template-columns:330px minmax(0,1fr); gap:20px; align-items:start; }
+.homepage-library { position:sticky; top:80px; }
+.homepage-library>input { width:100%; margin-bottom:14px; }
+.homepage-library-list { max-height:70vh; overflow:auto; display:grid; gap:8px; }
+.homepage-library-list article { display:grid; grid-template-columns:74px 1fr; gap:10px; padding:8px; border:1px solid var(--line); border-radius:8px; cursor:grab; }
+.homepage-library-list img { width:74px; height:58px; object-fit:cover; border-radius:5px; }
+.homepage-library-list article div { min-width:0; display:grid; gap:3px; }
+.homepage-library-list strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; }
+.homepage-library-list small,.homepage-library-list span { color:var(--muted); font-size:10px; }
+.homepage-layout-editor { display:grid; gap:20px; }
+.editorial-section .section-title { margin-bottom:14px; }
+.slot-zone { min-height:105px; padding:12px; border:1px dashed #aab7b0; border-radius:10px; background:#f7f9f6; }
+.slot-zone>p { margin:30px 0; color:var(--muted); text-align:center; font-size:12px; }
+.slot-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.homepage-slot-card { position:relative; display:grid; grid-template-columns:100px 1fr; gap:12px; min-height:82px; padding:8px; border:1px solid var(--line); border-radius:8px; background:white; }
+.homepage-slot-card img { width:100px; height:66px; object-fit:cover; border-radius:5px; }
+.homepage-slot-card>div { min-width:0; display:grid; align-content:start; gap:5px; }
+.homepage-slot-card small { color:var(--green); font-size:10px; }
+.homepage-slot-card strong { font-size:12px; line-height:1.4; }
+.homepage-slot-card .slot-actions { position:absolute; right:5px; bottom:5px; display:flex; gap:3px; }
+.slot-actions button { width:24px; height:24px; padding:0; border:1px solid var(--line); border-radius:5px; background:white; cursor:pointer; }
+@media(max-width:1000px){.homepage-desk{grid-template-columns:1fr}.homepage-library{position:static}.homepage-library-list{max-height:340px}}
 .form-side fieldset { border:1px solid var(--line); border-radius:8px; padding:12px; }
 .form-side legend { color:#3b4541; font-size:13px; font-weight:600; padding:0 4px; }
 .form-side .check { display:flex; align-items:center; gap:8px; padding:5px 0; font-weight:400; }
