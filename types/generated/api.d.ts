@@ -181,6 +181,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/articles/public/slug/{slug}/view": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record a public article view with a 30-minute visitor deduplication window */
+        post: operations["ArticlesController_recordPublicView"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/articles/public/withdrawn/slug/{slug}": {
         parameters: {
             query?: never;
@@ -699,6 +716,10 @@ export interface components {
             publishedAt: string | null;
             /** @description 编辑中的文章是否仍有一个旧版本在线展示 */
             hasPublishedVersion: boolean;
+            /** @example 128 */
+            viewCount: number;
+            /** Format: date-time */
+            lastViewedAt: string | null;
         };
         ArticlePageDto: {
             items: components["schemas"]["ArticleDto"][];
@@ -708,6 +729,22 @@ export interface components {
             page: number;
             /** @example 20 */
             limit: number;
+        };
+        RecordArticleViewDto: {
+            /**
+             * @description Anonymous browser visitor identifier
+             * @example visitor-7f10d8d6
+             */
+            visitorId: string;
+        };
+        ArticleViewCountDto: {
+            /** @example 128 */
+            viewCount: number;
+            /**
+             * @description Whether this request increased the count
+             * @example true
+             */
+            counted: boolean;
         };
         WithdrawalNoticeDto: {
             title: string;
@@ -1187,6 +1224,31 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ArticleDto"];
+                };
+            };
+        };
+    };
+    ArticlesController_recordPublicView: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordArticleViewDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArticleViewCountDto"];
                 };
             };
         };

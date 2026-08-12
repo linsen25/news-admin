@@ -1,8 +1,8 @@
 <template>
   <form class="article-form" @submit.prevent="emitAction('save')">
     <section class="panel form-main">
-      <label>文章标题<input v-model="form.title" required placeholder="输入清晰、准确的新闻标题"></label>
-      <label>摘要<textarea v-model="form.summary" rows="3" placeholder="用一至两句话概括文章重点，将显示在新闻列表中"></textarea></label>
+      <label>文章标题<input v-model="form.title" required maxlength="80" placeholder="输入清晰、准确的新闻标题"><small>{{ form.title.length }} / 80</small></label>
+      <label>摘要<textarea v-model="form.summary" rows="3" maxlength="180" placeholder="用一至两句话概括文章重点，将显示在新闻列表中"></textarea><small>{{ form.summary.length }} / 180</small></label>
       <div class="article-credit-fields">
         <label>文章作者（署名，可选）<input v-model="form.byline" placeholder="例如：李明、本报通讯员或中加网编辑部"><small>留空时前台只显示稿件日期，不会使用你的后台账号名称。</small></label>
         <label>稿件日期<AppDatePicker v-model="form.articleDate" /><small>显示在文章页面；系统创建时间和实际发布时间仍会分别记录。</small></label>
@@ -161,6 +161,8 @@ watchEffect(() => { if (!categories.value.some((item) => item.id === form.catego
 watch(() => form.categoryId, () => { form.tagIds = form.tagIds.filter((id) => availableTags.value.some((tag) => tag.id === id)); });
 const emitAction = (action: 'save' | 'preview' | 'submit') => {
   if (!form.title.trim()) return toast.error('请填写文章标题');
+  if (form.title.length > 80) return toast.error('文章标题不能超过80个字符');
+  if (form.summary.length > 180) return toast.error('文章摘要不能超过180个字符');
   if (!form.articleDate) return toast.error('请选择稿件日期');
   if (!form.categoryId) return toast.error('请选择一个文章分类');
   if (!form.tagIds.length) return toast.error('请至少选择一个文章标签');

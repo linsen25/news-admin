@@ -14,13 +14,18 @@
         <AppSelect v-model="categoryId" :options="categoryOptions" placeholder="全部分类" allow-empty />
         <AppSelect v-model="status" :options="statusOptions" placeholder="全部状态" allow-empty />
       </div>
+      <nav class="article-category-tabs" aria-label="按分类查看文章">
+        <button type="button" :class="{ active: !categoryId }" @click="categoryId=''">全部分类</button>
+        <button v-for="category in categories" :key="category.id" type="button" :class="{ active: categoryId === category.id }" @click="categoryId=category.id">{{ category.name }}</button>
+      </nav>
 
       <p v-if="pending" class="empty-state">正在加载文章台账…</p>
       <div v-else class="article-register">
-        <div class="article-register-head"><span>文章</span><span>分类 / 状态</span><span>人员</span><span>时间</span><span>操作</span></div>
+        <div class="article-register-head"><span>文章</span><span>分类 / 状态</span><span>浏览量</span><span>人员</span><span>时间</span><span>操作</span></div>
         <article v-for="article in pageData.items" :key="article.id" class="article-register-row">
           <div class="register-title"><strong>{{ article.title }}</strong><p>{{ article.summary || '暂无摘要' }}</p><div><span v-for="tag in article.tags" :key="tag.id"># {{ tag.name }}</span></div></div>
           <div class="register-taxonomy"><strong>{{ article.category.name }}</strong><StatusBadge :status="article.status" /><small v-if="article.hasPublishedVersion" class="live-version-note">线上旧版仍在展示</small></div>
+          <div class="register-views"><strong>{{ article.viewCount.toLocaleString('zh-CN') }}</strong><small>公开浏览</small></div>
           <div class="register-people"><span><small>文章署名</small>{{ article.byline || '未署名' }}</span><span><small>录入负责人</small>{{ article.author.name }}</span><span><small>最近编辑</small>{{ article.currentEditor.name }}</span></div>
           <div class="register-times"><span><small>创建</small>{{ formatTime(article.createdAt) }}</span><span><small>修改</small>{{ formatTime(article.updatedAt) }}</span></div>
           <NuxtLink class="register-action" :to="`/articles/edit/${article.id}`">{{ ['draft','rejected','published','withdrawn'].includes(article.status) ? '编辑' : '查看' }} →</NuxtLink>
