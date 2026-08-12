@@ -4,6 +4,7 @@
       <NuxtLink class="brand" to="/dashboard">Newsroom<span>CMS</span></NuxtLink>
       <nav>
         <NuxtLink to="/dashboard">概览</NuxtLink>
+        <NuxtLink to="/analytics">文章分析</NuxtLink>
         <NuxtLink v-slot="{ href, navigate }" to="/articles" custom>
           <a :href="href" :class="{ 'sidebar-active': articlesActive }" @click="navigate">文章管理 <span v-if="!hasPermission('articles.create')" class="nav-lock">🔒</span></a>
         </NuxtLink>

@@ -61,6 +61,20 @@ h2 { font-size:18px; }
 .stats-grid span,.stats-grid strong { display:block; }
 .stats-grid span { color:var(--muted); font-size:13px; }
 .stats-grid strong { font:700 32px 'Source Serif 4'; margin-top:10px; }
+.audience-summary { grid-template-columns:repeat(4,1fr); }
+.stats-grid .analytics-entry { font-family:'Noto Sans SC'; font-size:16px; color:var(--green); }
+.analytics-chart-panel { margin-bottom:24px; }
+.trend-chart { height:300px; display:grid; grid-template-columns:repeat(14,minmax(34px,1fr)); gap:8px; align-items:end; padding-top:25px; overflow-x:auto; }
+.trend-column { height:250px; min-width:34px; display:grid; grid-template-rows:18px 1fr 24px; gap:5px; text-align:center; }
+.trend-value { color:var(--muted); font-size:10px; }
+.trend-bar-track { position:relative; height:200px; display:flex; align-items:flex-end; border-bottom:1px solid var(--line); background:linear-gradient(to top,rgba(220,226,220,.35) 1px,transparent 1px); background-size:100% 25%; }
+.trend-bar { width:70%; margin:auto; min-height:0; border-radius:5px 5px 0 0; background:linear-gradient(180deg,var(--accent),var(--green)); transition:height .3s ease; }
+.trend-column time { color:var(--muted); font-size:10px; white-space:nowrap; }
+.analytics-ranking .ranking-head,.analytics-ranking article { display:grid; grid-template-columns:55px minmax(260px,1fr) 120px 100px; gap:16px; align-items:center; padding:13px 5px; border-bottom:1px solid #edf0ed; }
+.analytics-ranking .ranking-head { color:var(--muted); font-size:11px; font-weight:700; }
+.analytics-ranking article>div { display:grid; gap:4px; }
+.analytics-ranking article a { font-weight:700; }
+.rank-number { color:#94a098; font:700 24px 'Source Serif 4'; }
 .activity-row { display:flex; justify-content:space-between; align-items:center; border-top:1px solid #edf0ed; padding:14px 0; }
 .activity-row small,.table-row small { display:block; margin-top:4px; }
 .status-badge { display:inline-block; width:max-content; border-radius:99px; padding:5px 9px; font-size:12px; font-weight:600; }
