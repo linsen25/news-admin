@@ -33,6 +33,7 @@
 
 <script setup lang="ts">
 const { user, logout, hasPermission } = useAuth();
+useActiveServiceHeartbeat();
 const route = useRoute();
 const draftsActive = computed(() => route.path === '/articles' && route.query.status === 'draft');
 const articlesActive = computed(() =>
