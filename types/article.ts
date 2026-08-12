@@ -13,6 +13,10 @@ export type ArticleInput = CreateArticleDTO & {
   summary: string;
   content: TipTapDocument;
   coverImage: string;
+  coverFocalX: number;
+  coverFocalY: number;
+  isHeadline: boolean;
+  homepagePriority: number;
   currentEditorId: string;
   tagIds: string[];
   status: ArticleStatus;

@@ -695,6 +695,14 @@ export interface components {
             content: components["schemas"]["TipTapDocumentDto"];
             /** @example https://example.com/cover.jpg */
             coverImage: string;
+            /** @default 50 */
+            coverFocalX: number;
+            /** @default 50 */
+            coverFocalY: number;
+            /** @default false */
+            isHeadline: boolean;
+            /** @default 0 */
+            homepagePriority: number;
             /** @example 李明（本报特约记者） */
             byline: string;
             /** Format: date-time */
@@ -789,6 +797,20 @@ export interface components {
             content?: components["schemas"]["TipTapDocumentDto"];
             /** @example https://example.com/cover.jpg */
             coverImage?: string;
+            /** @default 50 */
+            coverFocalX: number;
+            /** @default 50 */
+            coverFocalY: number;
+            /**
+             * @description 管理员设置的首页头条候选
+             * @default false
+             */
+            isHeadline: boolean;
+            /**
+             * @description 首页人工排序权重，数值越大越靠前
+             * @default 0
+             */
+            homepagePriority: number;
             /**
              * @description 面向读者展示的文章署名；与后台录入账号分开
              * @example 李明（本报特约记者）
@@ -837,6 +859,20 @@ export interface components {
             content?: components["schemas"]["TipTapDocumentDto"];
             /** @example https://example.com/cover.jpg */
             coverImage?: string;
+            /** @default 50 */
+            coverFocalX: number;
+            /** @default 50 */
+            coverFocalY: number;
+            /**
+             * @description 管理员设置的首页头条候选
+             * @default false
+             */
+            isHeadline: boolean;
+            /**
+             * @description 首页人工排序权重，数值越大越靠前
+             * @default 0
+             */
+            homepagePriority: number;
             /**
              * @description 面向读者展示的文章署名；与后台录入账号分开
              * @example 李明（本报特约记者）

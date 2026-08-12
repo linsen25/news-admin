@@ -49,7 +49,7 @@
 
       <div class="cover-upload-block">
         <strong>封面图片</strong>
-        <p>选择图片后自动裁剪为 16:9，并上传到媒体库。</p>
+        <p>上传原图后，可通过下方焦点控制决定横向封面保留的位置。</p>
         <button class="button secondary" type="button" :disabled="coverUploading" @click="coverInput?.click()">
           {{ coverUploading ? '处理并上传中…' : form.coverImage ? '更换封面' : '选择并上传封面' }}
         </button>
@@ -57,9 +57,20 @@
         <input ref="coverInput" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp" @change="uploadCover">
       </div>
       <div class="cover-placeholder">
-        <img v-if="form.coverImage" :src="form.coverImage" alt="封面预览">
-        <template v-else>建议使用横向高清图片<br><small>自动裁剪比例：16:9</small></template>
+        <img v-if="form.coverImage" :src="form.coverImage" alt="封面预览" :style="coverPositionStyle">
+        <template v-else>建议使用横向高清图片<br><small>前台显示比例：16:9</small></template>
       </div>
+      <fieldset v-if="form.coverImage" class="cover-focus-controls">
+        <legend>封面焦点</legend>
+        <label>左右位置 <input v-model.number="form.coverFocalX" type="range" min="0" max="100"><output>{{ form.coverFocalX }}%</output></label>
+        <label>上下位置 <input v-model.number="form.coverFocalY" type="range" min="0" max="100"><output>{{ form.coverFocalY }}%</output></label>
+        <small>移动滑块，让人物或画面主体保留在预览框中。</small>
+      </fieldset>
+      <fieldset v-if="hasPermission('users.permissions.manage')" class="homepage-editorial-controls">
+        <legend>首页编排 <small>仅管理员</small></legend>
+        <label class="editorial-toggle"><input v-model="form.isHeadline" type="checkbox"><span>设为今日头条候选</span></label>
+        <label>首页权重 <input v-model.number="form.homepagePriority" type="number" min="0" max="999"><small>0 为自动排序；数值越大，在首页和所属分类中越靠前。</small></label>
+      </fieldset>
       <p class="status-line">当前状态：<StatusBadge :status="form.status" /></p>
       <button v-if="hasPermission('articles.save.draft')" class="button primary" type="submit" :disabled="saving || coverUploading">{{ saving ? '保存中…' : '保存到草稿箱' }}</button>
       <button class="button secondary" type="button" :disabled="saving || coverUploading" @click="emitAction('preview')">预览</button>
@@ -70,7 +81,7 @@
     <div v-if="coverLibraryOpen" class="modal-backdrop editor-modal-layer" @click.self="coverLibraryOpen=false">
       <section class="modal-card media-picker-dialog">
         <div class="section-title"><div><p class="eyebrow">MEDIA LIBRARY</p><h2>选择文章封面</h2></div><button class="modal-close" type="button" @click="coverLibraryOpen=false">×</button></div>
-        <p class="muted">选择已有图片作为封面；前台会以 16:9 居中裁切展示，原图不会被修改。</p>
+        <p class="muted">选择已有图片作为封面；前台会以 16:9 展示，并按你设置的封面焦点裁切。</p>
         <p v-if="coverLibraryPending" class="muted">正在加载媒体库…</p>
         <div v-else-if="coverAssets.length" class="media-picker-grid cover-library-grid">
           <button v-for="asset in coverAssets" :key="asset.id" type="button" :class="{ selected:form.coverImage===asset.url }" @click="selectCover(asset)"><img :src="asset.url" :alt="asset.filename"><span>{{ asset.filename }}</span></button>
@@ -109,28 +120,19 @@ const form = reactive<ArticleInput>({
   byline: props.initial?.byline ?? '', articleDate: props.initial?.articleDate?.slice(0, 10) ?? new Date().toISOString().slice(0, 10),
   metaTitle: props.initial?.metaTitle ?? '', metaDescription: props.initial?.metaDescription ?? '', keywords: props.initial?.keywords ?? [],
   content: props.initial?.content ?? emptyDocument(), coverImage: props.initial?.coverImage ?? '',
+  coverFocalX: props.initial?.coverFocalX ?? 50, coverFocalY: props.initial?.coverFocalY ?? 50,
+  isHeadline: props.initial?.isHeadline ?? false, homepagePriority: props.initial?.homepagePriority ?? 0,
   categoryId: props.initial?.categoryId ?? 'cat-ai', tagIds: props.initial?.tagIds ?? [], status: props.initial?.status ?? 'draft',
   authorId: props.initial?.authorId ?? actorId, currentEditorId: actorId,
 });
 
-const cropCover = async (file: File) => {
-  const bitmap = await createImageBitmap(file);
-  const ratio = 16 / 9;
-  const sourceWidth = bitmap.width / bitmap.height > ratio ? bitmap.height * ratio : bitmap.width;
-  const sourceHeight = sourceWidth / ratio;
-  const canvas = document.createElement('canvas');
-  canvas.width = 1600; canvas.height = 900;
-  canvas.getContext('2d')!.drawImage(bitmap, (bitmap.width - sourceWidth) / 2, (bitmap.height - sourceHeight) / 2, sourceWidth, sourceHeight, 0, 0, 1600, 900);
-  bitmap.close();
-  const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob((value) => value ? resolve(value) : reject(new Error('图片裁剪失败')), 'image/jpeg', .88));
-  return new File([blob], `${file.name.replace(/\.[^.]+$/, '')}-cover.jpg`, { type: 'image/jpeg' });
-};
+const coverPositionStyle = computed(() => ({ objectPosition: `${form.coverFocalX}% ${form.coverFocalY}%` }));
 const uploadCover = async (event: Event) => {
   const input = event.target as HTMLInputElement;
   const file = input.files?.[0];
   if (!file) return;
   coverUploading.value = true;
-  try { const asset = await mediaApi.uploadImage(await cropCover(file)); form.coverImage = asset.url; toast.success('封面已按 16:9 裁剪并上传'); }
+  try { const asset = await mediaApi.uploadImage(file); form.coverImage = asset.url; form.coverFocalX = 50; form.coverFocalY = 50; toast.success('封面已上传，可继续调整画面焦点'); }
   catch (exception) { toast.error(getApiErrorMessage(exception)); }
   finally { coverUploading.value = false; input.value = ''; }
 };
